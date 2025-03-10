@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - CBT</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Para gráficos -->
+    <style>
+        /* Estilos Globales */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        /* Header más compacto */
+        header {
+            background-color: #2E7D32;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.5s ease-in-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        header .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        header .logout-button {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-left: 10px;
+        }
+
+        header .logout-button:hover {
+            background-color: #c62828;
+            transform: scale(1.05);
+        }
+
+        header .logout-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Botón de modo oscuro con íconos */
+        .dark-mode-toggle {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: #555;
+            transform: scale(1.05);
+        }
+
+        body.dark-mode .dark-mode-toggle {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        body.dark-mode .dark-mode-toggle:hover {
+            background-color: #45a049;
+        }
+
+        /* Input de búsqueda */
+        #search-input {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode #search-input {
+            background-color: #333;
+            color: white;
+        }
+
+        /* Contenedor principal */
+        main {
+            margin-top: 60px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        /* Caja de contenido */
+        .content-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            transition: box-shadow 0.3s ease, transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        body.dark-mode .content-box {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-box:hover {
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .content-box h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #2E7D32;
+        }
+
+        body.dark-mode .content-box h2 {
+            color: #4CAF50;
+        }
+
+        .admin-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .admin-actions button {
+            background-color: #2E7D32;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .admin-actions button:hover {
+            background-color: #1B5E20;
+            transform: scale(1.05);
+        }
+
+        /* Listado de Grupos */
+        #group-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .group-container {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease, transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        body.dark-mode .group-container {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .group-container:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .groups-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .groups-table th,
+        .groups-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 1rem;
+        }
+
+        body.dark-mode .groups-table th,
+        body.dark-mode .groups-table td {
+            border-bottom: 1px solid #444;
+        }
+
+        .groups-table th {
+            background-color: #2E7D32;
+            color: white;
+        }
+
+        body.dark-mode .groups-table th {
+            background-color: #4CAF50;
+        }
+
+        .groups-table tr:hover {
+            background-color: #f4f4f4;
+        }
+
+        body.dark-mode .groups-table tr:hover {
+            background-color: #333;
+        }
+
+        /* Pie de página */
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #2E7D32;
+            color: white;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+            font-size: 0.9rem;
+            animation: slideUp 0.5s ease-in-out;
+        }
+
+        body.dark-mode footer {
+            background-color: #1B5E20;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* Estilos Responsivos */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 10px;
+            }
+            .header-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .logout-button {
+                margin-left: 0;
+            }
+            .admin-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .content-box {
+                padding: 15px;
+            }
+            .groups-table th, .groups-table td {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Estilos para el dashboard */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-box h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2E7D32;
+        }
+
+        .stat-box p {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        body.dark-mode .stat-box {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        body.dark-mode .stat-box h3 {
+            color: #4CAF50;
+        }
+
+        body.dark-mode .stat-box p {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body onload="cargarAdminDatos()">
+    <!-- Barra de encabezado más compacta -->
+    <header>
+        <h1 id="admin-name">Panel de Administración</h1>
+        <div class="header-buttons">
+            <input type="text" id="search-input" placeholder="Buscar alumno..." oninput="buscarAlumno()" aria-label="Buscar alumno">
+            <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="Cambiar modo oscuro">🌙</button>
+            <button class="logout-button" onclick="logout()" aria-label="Cerrar sesión">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main>
+        <!-- Dashboard con Resumen General -->
+        <section class="content-box">
+            <h2>Resumen General</h2>
+            <div class="dashboard-stats">
+                <div class="stat-box">
+                    <h3>Grupos</h3>
+                    <p id="total-grupos">0</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Maestros</h3>
+                    <p id="total-maestros">0</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Materias</h3>
+                    <p id="total-materias">0</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Alumnos</h3>
+                    <p id="total-alumnos">0</p>
+                </div>
+            </div>
+            <canvas id="chart-alumnos-por-grupo"></canvas> <!-- Gráfico de alumnos por grupo -->
+        </section>
+
+        <!-- Gestión de Grupos y Alumnos -->
+        <section class="content-box">
+            <h2>Gestión de Grupos y Alumnos</h2>
+            <div class="admin-actions">
+                <button onclick="addGroup()" aria-label="Agregar grupo">Agregar Grupo</button>
+                <button onclick="removeGroup()" aria-label="Quitar grupo">Quitar Grupo</button>
+                <button onclick="exportarDatos()" aria-label="Exportar datos">Exportar Datos</button>
+                <button onclick="addTeacher()" aria-label="Agregar maestro">Agregar Maestro</button>
+            </div>
+
+            <div id="group-list">
+                <!-- Aquí se insertarán dinámicamente los grupos -->
+            </div>
+        </section>
+
+        <!-- Asignación de Maestros a Grupos y Materias -->
+        <section class="content-box">
+            <h2>Asignación de Maestros y Materias</h2>
+            <div id="teacher-assignment">
+                <!-- Aquí se insertará la tabla de asignación de maestros -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Pie de página -->
+    <footer>
+        <p>&copy; 2025 CBT Profesor Luis Camarena González</p>
+    </footer>
+
+    <script>
+        // Función para mostrar notificaciones con SweetAlert2
+        function mostrarNotificacion(titulo, mensaje, tipo) {
+            Swal.fire({
+                title: titulo,
+                text: mensaje,
+                icon: tipo,
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Cargar datos del administrador
+        function cargarAdminDatos() {
+            let urlParams = new URLSearchParams(window.location.search);
+            let adminEmail = urlParams.get('admin');
+            if (!adminEmail) {
+                mostrarNotificacion("Error", "No has iniciado sesión.", "error");
+                window.location.href = "index.html";
+                return;
+            }
+            document.getElementById("admin-name").textContent = `Bienvenido, ${adminEmail}`;
+            cargarGrupos();
+            cargarMaestros();
+            actualizarResumen();
+            cargarGraficoAlumnosPorGrupo();
+        }
+
+        // Actualizar el resumen general
+        function actualizarResumen() {
+            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+            let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+            document.getElementById("total-grupos").textContent = grupos.length;
+            document.getElementById("total-maestros").textContent = maestros.length;
+            let totalAlumnos = grupos.reduce((total, grupo) => total + grupo.alumnos.length, 0);
+            document.getElementById("total-alumnos").textContent = totalAlumnos;
+        }
+
+        // Cargar gráfico de alumnos por grupo
+        function cargarGraficoAlumnosPorGrupo() {
+            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+            let ctx = document.getElementById('chart-alumnos-por-grupo').getContext('2d');
+            let labels = grupos.map(grupo => grupo.nombre);
+            let data = grupos.map(grupo => grupo.alumnos.length);
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Alumnos por Grupo',
+                        data: data,
+                        backgroundColor: '#2E7D32',
+                        borderColor: '#1B5E20',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Cerrar sesión
+        function logout() {
+            Swal.fire({
+                title: '¿Cerrar sesión?',
+                text: '¿Estás seguro de que deseas cerrar sesión?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, cerrar sesión',
+                cancelButtonText: 'Cancelar',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "index.html";
+                }
+            });
+        }
+
+        // Cargar grupos desde localStorage
+        function cargarGrupos() {
+            let groupContainer = document.getElementById("group-list");
+            groupContainer.innerHTML = "";
+            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+            if (grupos.length === 0) {
+                groupContainer.innerHTML = "<p>No hay grupos registrados.</p>";
+                return;
+            }
+            grupos.forEach(grupo => {
+                let groupElement = document.createElement("div");
+                groupElement.classList.add("group-container");
+                groupElement.innerHTML = 
+                    `<h3>Grupo: ${grupo.nombre}</h3>
+                    <table class="groups-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Matrícula</th>
+                                <th>Correo</th>
+                                <th>Contraseña</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="${grupo.id}">
+                            ${grupo.alumnos.map(alumno => 
+                                `<tr>
+                                    <td>${alumno.nombre}</td>
+                                    <td>${alumno.matricula}</td>
+                                    <td>${alumno.email}</td>
+                                    <td>${alumno.password}</td>
+                                    <td>
+                                        <button onclick="removeStudent('${grupo.id}', '${alumno.matricula}')" aria-label="Quitar alumno">Quitar</button>
+                                    </td>
+                                </tr>`
+                            ).join('')}
+                        </tbody>
+                    </table>
+                    <button onclick="addStudent('${grupo.id}')" aria-label="Agregar alumno">Agregar Alumno</button>
+                    <button onclick="assignTeacher('${grupo.id}')" aria-label="Asignar maestro">Asignar Maestro</button>`;
+                groupContainer.appendChild(groupElement);
+            });
+        }
+
+        // Cargar maestros desde localStorage
+        function cargarMaestros() {
+            let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+            // Aquí puedes agregar la lógica para mostrar los maestros en la interfaz
+        }
+
+        // Agregar un grupo
+        function addGroup() {
+            Swal.fire({
+                title: 'Agregar Grupo',
+                input: 'text',
+                inputLabel: 'Nombre del Grupo',
+                inputPlaceholder: 'Ingrese el nombre del grupo',
+                showCancelButton: true,
+                confirmButtonText: 'Agregar',
+                cancelButtonText: 'Cancelar',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'El nombre del grupo no puede estar vacío.';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let nombreGrupo = result.value;
+                    let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+                    let grupoExistente = grupos.find(g => g.nombre === nombreGrupo);
+                    if (grupoExistente) {
+                        mostrarNotificacion("Error", "El grupo ya existe.", "error");
+                        return;
+                    }
+                    let nuevoGrupo = { id: `grupo-${Date.now()}`, nombre: nombreGrupo, alumnos: [], maestro: null };
+                    grupos.push(nuevoGrupo);
+                    localStorage.setItem("grupos", JSON.stringify(grupos));
+                    cargarGrupos();
+                    mostrarNotificacion("Éxito", "Grupo agregado correctamente.", "success");
+                }
+            });
+        }
+
+        // Eliminar un grupo
+        function removeGroup() {
+            Swal.fire({
+                title: 'Eliminar Grupo',
+                input: 'text',
+                inputLabel: 'Nombre del Grupo',
+                inputPlaceholder: 'Ingrese el nombre del grupo a eliminar',
+                showCancelButton: true,
+                confirmButtonText: 'Eliminar',
+                cancelButtonText: 'Cancelar',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'El nombre del grupo no puede estar vacío.';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let nombreGrupo = result.value;
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: "¡No podrás revertir esto!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#2E7D32',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sí, eliminar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+                            grupos = grupos.filter(g => g.nombre !== nombreGrupo);
+                            localStorage.setItem("grupos", JSON.stringify(grupos));
+                            cargarGrupos();
+                            mostrarNotificacion("Éxito", "Grupo eliminado correctamente.", "success");
+                        }
+                    });
+                }
+            });
+        }
+
+        // Agregar un alumno
+        function addStudent(groupId) {
+            Swal.fire({
+                title: 'Agregar Alumno',
+                html: `
+                    <input type="text" id="student-name" class="swal2-input" placeholder="Nombre del Alumno">
+                    <input type="text" id="student-id" class="swal2-input" placeholder="Matrícula del Alumno">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Agregar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    let studentName = document.getElementById('student-name').value;
+                    let studentId = document.getElementById('student-id').value;
+                    if (!studentName || !studentId) {
+                        Swal.showValidationMessage('Todos los campos son obligatorios.');
+                    }
+                    return { studentName, studentId };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let { studentName, studentId } = result.value;
+                    let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+                    let grupo = grupos.find(g => g.id === groupId);
+                    if (grupo) {
+                        let alumnoExistente = grupo.alumnos.find(a => a.matricula === studentId);
+                        if (alumnoExistente) {
+                            mostrarNotificacion("Error", "El alumno ya está registrado.", "error");
+                            return;
+                        }
+                        // Generar correo y contraseña automáticamente
+                        let studentEmail = `al${studentId}@cbt.com`;
+                        let studentPassword = generarContraseña();
+                        grupo.alumnos.push({ 
+                            nombre: studentName, 
+                            matricula: studentId, 
+                            email: studentEmail, 
+                            password: studentPassword 
+                        });
+                        localStorage.setItem("grupos", JSON.stringify(grupos));
+                        cargarGrupos();
+                        mostrarNotificacion("Éxito", "Alumno agregado correctamente.", "success");
+                    }
+                }
+            });
+        }
+
+        // Eliminar un alumno
+        function removeStudent(groupId, studentId) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#2E7D32',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+                    let grupo = grupos.find(g => g.id === groupId);
+                    if (grupo) {
+                        grupo.alumnos = grupo.alumnos.filter(alumno => alumno.matricula !== studentId);
+                        localStorage.setItem("grupos", JSON.stringify(grupos));
+                        cargarGrupos();
+                        mostrarNotificacion("Éxito", "Alumno eliminado correctamente.", "success");
+                    }
+                }
+            });
+        }
+
+        // Agregar un maestro
+        function addTeacher() {
+            Swal.fire({
+                title: 'Agregar Maestro',
+                html: `
+                    <input type="text" id="teacher-name" class="swal2-input" placeholder="Nombre del Maestro">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Agregar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    let teacherName = document.getElementById('teacher-name').value;
+                    if (!teacherName) {
+                        Swal.showValidationMessage('El nombre del maestro no puede estar vacío.');
+                    }
+                    return { teacherName };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let { teacherName } = result.value;
+                    let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+                    // Generar correo y contraseña automáticamente
+                    let teacherEmail = `prof.${teacherName.toLowerCase().replace(/\s+/g, '.')}@cbt.com`;
+                    let teacherPassword = generarContraseña();
+                    let nuevoMaestro = { 
+                        id: `maestro-${Date.now()}`, 
+                        nombre: teacherName, 
+                        email: teacherEmail, 
+                        password: teacherPassword 
+                    };
+                    maestros.push(nuevoMaestro);
+                    localStorage.setItem("maestros", JSON.stringify(maestros));
+                    cargarMaestros();
+                    mostrarNotificacion("Éxito", "Maestro agregado correctamente.", "success");
+                }
+            });
+        }
+
+        // Generar contraseña automáticamente (solo letras y números)
+        function generarContraseña() {
+            const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; // Solo letras y números
+            let contraseña = '';
+            for (let i = 0; i < 10; i++) { // Longitud de 10 caracteres
+                contraseña += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+            }
+            return contraseña;
+        }
+
+        // Asignar un maestro a un grupo
+        function assignTeacher(groupId) {
+            let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+            if (maestros.length === 0) {
+                mostrarNotificacion("Error", "No hay maestros disponibles.", "error");
+                return;
+            }
+
+            let options = maestros.map(maestro => `<option value="${maestro.id}">${maestro.nombre}</option>`).join('');
+            Swal.fire({
+                title: 'Asignar Maestro',
+                html: `<select id="teacher-select">${options}</select>`,
+                showCancelButton: true,
+                confirmButtonText: 'Asignar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    let selectedTeacherId = document.getElementById('teacher-select').value;
+                    return selectedTeacherId;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+                    let grupo = grupos.find(g => g.id === groupId);
+                    if (grupo) {
+                        grupo.maestro = result.value;
+                        localStorage.setItem("grupos", JSON.stringify(grupos));
+                        cargarGrupos();
+                        mostrarNotificacion("Éxito", "Maestro asignado correctamente.", "success");
+                    }
+                }
+            });
+        }
+
+        // Búsqueda de alumnos con debounce
+        let timeout;
+        function buscarAlumno() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                let searchTerm = document.getElementById('search-input').value.toLowerCase();
+                let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+                let resultados = [];
+                grupos.forEach(grupo => {
+                    grupo.alumnos.forEach(alumno => {
+                        if (alumno.nombre.toLowerCase().includes(searchTerm) || alumno.matricula.toLowerCase().includes(searchTerm)) {
+                            resultados.push({ grupo: grupo.nombre, alumno });
+                        }
+                    });
+                });
+                mostrarResultados(resultados);
+            }, 300); // Debounce de 300ms
+        }
+
+        // Mostrar resultados de búsqueda
+        function mostrarResultados(resultados) {
+            let groupContainer = document.getElementById("group-list");
+            groupContainer.innerHTML = "";
+
+            if (resultados.length === 0) {
+                groupContainer.innerHTML = "<p>No se encontraron resultados.</p>";
+                return;
+            }
+
+            resultados.forEach(resultado => {
+                let groupElement = document.createElement("div");
+                groupElement.classList.add("group-container");
+                groupElement.innerHTML = 
+                    `<h3>Grupo: ${resultado.grupo}</h3>
+                    <table class="groups-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Matrícula</th>
+                                <th>Correo</th>
+                                <th>Contraseña</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>${resultado.alumno.nombre}</td>
+                                <td>${resultado.alumno.matricula}</td>
+                                <td>${resultado.alumno.email}</td>
+                                <td>${resultado.alumno.password}</td>
+                                <td>
+                                    <button onclick="removeStudent('${resultado.grupo}', '${resultado.alumno.matricula}')">Quitar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>`;
+                groupContainer.appendChild(groupElement);
+            });
+        }
+
+        // Exportar datos a Excel
+        function exportarDatos() {
+            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+            let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+
+            // Crear un libro de trabajo y una hoja
+            let workbook = XLSX.utils.book_new();
+            let worksheetData = [];
+
+            // Encabezados
+            worksheetData.push(["Grupo", "Nombre", "Matrícula", "Correo", "Contraseña", "Maestro"]);
+
+            // Datos
+            grupos.forEach(grupo => {
+                let maestroNombre = "No asignado";
+                if (grupo.maestro) {
+                    let maestro = maestros.find(m => m.id === grupo.maestro);
+                    if (maestro) maestroNombre = maestro.nombre;
+                }
+                grupo.alumnos.forEach(alumno => {
+                    worksheetData.push([
+                        grupo.nombre,
+                        alumno.nombre,
+                        alumno.matricula,
+                        alumno.email,
+                        alumno.password,
+                        maestroNombre
+                    ]);
+                });
+            });
+
+            // Convertir los datos en una hoja de trabajo
+            let worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Alumnos");
+
+            // Generar el archivo Excel
+            XLSX.writeFile(workbook, "alumnos.xlsx");
+        }
+
+        // Cambiar modo oscuro
+        function toggleDarkMode() {
+            const body = document.body;
+            const darkModeToggle = document.querySelector('.dark-mode-toggle');
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            localStorage.setItem('dark-mode', isDarkMode);
+
+            // Cambiar el ícono del botón según el modo actual
+            if (isDarkMode) {
+                darkModeToggle.textContent = '🌞';
+            } else {
+                darkModeToggle.textContent = '🌙';
+            }
+        }
+
+        // Verificar el modo oscuro al cargar la página
+        window.onload = function() {
+            const body = document.body;
+            const darkModeToggle = document.querySelector('.dark-mode-toggle');
+            const isDarkMode = localStorage.getItem('dark-mode') === 'true';
+
+            if (isDarkMode) {
+                body.classList.add('dark-mode');
+                darkModeToggle.textContent = '🌞';
+            } else {
+                darkModeToggle.textContent = '🌙';
+            }
+
+            cargarAdminDatos();
+        };
+    </script>
+</body>
+</html>

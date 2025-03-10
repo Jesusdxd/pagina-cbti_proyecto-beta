@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Maestros - CBT</title>
+    <!-- Incluir SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Estilos Globales */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2E7D32, #1B5E20);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .maestros-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .maestros-container h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: #2E7D32;
+            font-weight: bold;
+        }
+
+        .grupo {
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .grupo h3 {
+            font-size: 1.5rem;
+            color: #2E7D32;
+            margin-bottom: 15px;
+        }
+
+        .grupo table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .grupo th,
+        .grupo td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .grupo th {
+            background-color: #2E7D32;
+            color: white;
+        }
+
+        .grupo input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .btn {
+            background-color: #2E7D32;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #1B5E20;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #d32f2f;
+        }
+
+        .logout-btn:hover {
+            background-color: #b71c1c;
+        }
+
+        /* Animación de fondo */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 10%, transparent 10.01%);
+            background-size: 20px 20px;
+            animation: moveBackground 10s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes moveBackground {
+            from {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(-20px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="maestros-container">
+        <!-- Botón de Cerrar Sesión -->
+        <button class="btn logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <h2 id="nombre-maestro">Panel de Maestros</h2>
+        <div id="grupos-asignados">
+            <!-- Aquí se cargarán los grupos asignados al maestro -->
+        </div>
+    </div>
+
+    <script>
+        // Función para validar la sesión del maestro
+        function validarSesion() {
+            let urlParams = new URLSearchParams(window.location.search);
+            let maestroId = urlParams.get('maestro');
+
+            if (!maestroId) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No has iniciado sesión.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                }).then(() => {
+                    window.location.href = 'index.html';
+                });
+                return;
+            }
+
+            // Mostrar el nombre del maestro
+            let maestros = JSON.parse(localStorage.getItem('maestros')) || [];
+            let maestro = maestros.find(m => m.id === maestroId);
+
+            if (maestro) {
+                document.getElementById('nombre-maestro').textContent = `Bienvenido, ${maestro.nombre}`;
+            }
+        }
+
+        // Función para cargar los grupos asignados al maestro
+        function cargarGruposMaestro() {
+            let urlParams = new URLSearchParams(window.location.search);
+            let maestroId = urlParams.get('maestro');
+            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
+            let gruposMaestro = grupos.filter(g => g.maestro === maestroId);
+
+            let container = document.getElementById('grupos-asignados');
+            container.innerHTML = "";
+
+            if (gruposMaestro.length === 0) {
+                container.innerHTML = "<p>No tienes grupos asignados.</p>";
+                return;
+            }
+
+            gruposMaestro.forEach(grupo => {
+                let grupoElement = document.createElement('div');
+                grupoElement.classList.add('grupo');
+                grupoElement.innerHTML = `
+                    <h3>Grupo: ${grupo.nombre}</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Matrícula</th>
+                                <th>Calificación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${grupo.alumnos.map(alumno => `
+                                <tr>
+                                    <td>${alumno.nombre}</td>
+                                    <td>${alumno.matricula}</td>
+                                    <td>
+                                        <input type="number" id="calificacion-${alumno.matricula}" value="${alumno.calificacion || ''}" min="0" max="10">
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <button onclick="guardarCalificaciones('${grupo.id}')">Guardar Calificaciones</button>`;
+                container.appendChild(grupoElement);
+            });
+        }
+
+        // Función para guardar las calificaciones
+        function guardarCalificaciones(grupoId) {
+            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
+            let grupo = grupos.find(g => g.id === grupoId);
+
+            grupo.alumnos.forEach(alumno => {
+                let calificacion = document.getElementById(`calificacion-${alumno.matricula}`).value;
+                if (calificacion >= 0 && calificacion <= 10) {
+                    alumno.calificacion = calificacion;
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'La calificación debe estar entre 0 y 10.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                    });
+                    return;
+                }
+            });
+
+            localStorage.setItem('grupos', JSON.stringify(grupos));
+            Swal.fire({
+                title: 'Éxito',
+                text: 'Calificaciones guardadas correctamente.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Función para cerrar sesión
+        function cerrarSesion() {
+            Swal.fire({
+                title: '¿Cerrar sesión?',
+                text: '¿Estás seguro de que deseas cerrar sesión?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, cerrar sesión',
+                cancelButtonText: 'Cancelar',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        // Cargar los grupos asignados al maestro al cargar la página
+        validarSesion();
+        cargarGruposMaestro();
+    </script>
+
+</body>
+</html>

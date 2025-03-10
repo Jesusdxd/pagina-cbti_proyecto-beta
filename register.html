@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión - CBT</title>
+    <!-- Incluir SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Estilos Globales */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2E7D32, #1B5E20);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Contenedor del formulario de inicio de sesión */
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-container h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: #2E7D32;
+            font-weight: bold;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: calc(100% - 24px);
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #2E7D32;
+            outline: none;
+            box-shadow: 0 0 10px rgba(46, 125, 50, 0.3);
+        }
+
+        .input-group .error-message {
+            color: #d32f2f;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .input-group .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #2E7D32;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .input-group .toggle-password:hover {
+            color: #1B5E20;
+        }
+
+        .btn {
+            background-color: #2E7D32;
+            color: white;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #1B5E20;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Animación de fondo */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 10%, transparent 10.01%);
+            background-size: 20px 20px;
+            animation: moveBackground 10s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes moveBackground {
+            from {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(-20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <form id="login-form">
+            <div class="input-group">
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" placeholder="Ingresa tu correo" required aria-describedby="email-error">
+                <div class="error-message" id="email-error">Por favor, ingresa un correo válido.</div>
+            </div>
+            <div class="input-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" placeholder="Ingresa tu contraseña" required aria-describedby="password-error">
+                <span class="toggle-password" onclick="togglePasswordVisibility()" role="button" tabindex="0" aria-label="Mostrar contraseña">👁️</span>
+                <div class="error-message" id="password-error">La contraseña es requerida.</div>
+            </div>
+            <button type="submit" class="btn">Iniciar Sesión</button>
+        </form>
+        <p style="margin-top: 15px;">
+            ¿No tienes una cuenta? <a href="register.html">Regístrate aquí</a>
+        </p>
+        <p>
+            <a href="forgot-password.html">¿Olvidaste tu contraseña?</a>
+        </p>
+    </div>
+
+    <script>
+        // Función para mostrar/ocultar la contraseña
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.toggle-password');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.textContent = '👁️';
+                toggleIcon.setAttribute('aria-label', 'Ocultar contraseña');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.textContent = '👁️';
+                toggleIcon.setAttribute('aria-label', 'Mostrar contraseña');
+            }
+        }
+
+        // Función para mostrar alertas con SweetAlert2
+        function mostrarAlerta(titulo, texto, icono, confirmButtonText) {
+            return Swal.fire({
+                title: titulo,
+                text: texto,
+                icon: icono,
+                confirmButtonText: confirmButtonText,
+            });
+        }
+
+        // Validar que la contraseña solo contenga letras y números
+        function validarContraseña(password) {
+            const regex = /^[A-Za-z0-9]+$/; // Solo letras y números
+            return regex.test(password) && password.length >= 6; // Longitud mínima de 6 caracteres
+        }
+
+        // Al enviar el formulario de login
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let email = document.getElementById('email').value.trim();
+            let password = document.getElementById('password').value;
+
+            // Validar campos vacíos
+            if (!email || !password) {
+                mostrarAlerta('Error', 'Todos los campos son requeridos.', 'error', 'OK');
+                return;
+            }
+
+            // Validar formato de correo
+            if (!email.includes('@')) {
+                mostrarAlerta('Error', 'Ingresa un correo electrónico válido.', 'error', 'OK');
+                return;
+            }
+
+            // Validar contraseña
+            if (!validarContraseña(password)) {
+                mostrarAlerta('Error', 'La contraseña solo puede contener letras y números y debe tener al menos 6 caracteres.', 'error', 'OK');
+                return;
+            }
+
+            // Verificar si es administrador
+            if (email === 'admin@cbt.com' && password === 'admiO1') {
+                sessionStorage.setItem('userRole', 'admin');
+                sessionStorage.setItem('userEmail', email);
+                mostrarAlerta('Bienvenido Admin', 'Haz clic en el botón para continuar.', 'success', 'Continuar')
+                    .then(() => window.location.href = "admin.html");
+                return;
+            }
+
+            // Verificar si es maestro
+            let maestros = JSON.parse(localStorage.getItem('maestros')) || [];
+            let maestro = maestros.find(m => m.email === email && m.password === password);
+            if (maestro) {
+                sessionStorage.setItem('userRole', 'maestro');
+                sessionStorage.setItem('userNombre', maestro.nombre);
+                mostrarAlerta('Bienvenido Maestro', `Hola, ${maestro.nombre}.`, 'success', 'Continuar')
+                    .then(() => window.location.href = "maestros.html");
+                return;
+            }
+
+            // Verificar si es alumno
+            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
+            let alumnoEncontrado = null;
+            grupos.forEach(grupo => {
+                let alumno = grupo.alumnos.find(a => a.email === email && a.password === password);
+                if (alumno) {
+                    alumnoEncontrado = alumno;
+                }
+            });
+
+            if (alumnoEncontrado) {
+                sessionStorage.setItem('userRole', 'alumno');
+                sessionStorage.setItem('userNombre', alumnoEncontrado.nombre);
+                mostrarAlerta('Bienvenido Alumno', `Hola, ${alumnoEncontrado.nombre}.`, 'success', 'Continuar')
+                    .then(() => window.location.href = "student.html");
+                return;
+            }
+
+            // Si no coincide con ningún rol
+            mostrarAlerta('Error', 'Credenciales incorrectas o usuario no registrado.', 'error', 'OK');
+        });
+    </script>
+</body>
+</html>
