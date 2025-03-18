@@ -27,7 +27,7 @@
             border-radius: 20px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 800px;
+            max-width: 1000px;
             text-align: center;
             animation: fadeIn 1s ease-in-out;
             position: relative;
@@ -54,6 +54,10 @@
         .grupo {
             margin-bottom: 30px;
             text-align: left;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .grupo h3 {
@@ -70,7 +74,7 @@
 
         .grupo th,
         .grupo td {
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ddd;
             text-align: left;
         }
@@ -78,13 +82,19 @@
         .grupo th {
             background-color: #2E7D32;
             color: white;
+            font-weight: bold;
+        }
+
+        .grupo tr:hover {
+            background-color: #f1f1f1;
         }
 
         .grupo input[type="number"] {
             width: 80px;
-            padding: 5px;
+            padding: 8px;
             border-radius: 5px;
             border: 1px solid #ddd;
+            font-size: 1rem;
         }
 
         .btn {
@@ -97,6 +107,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
+            margin: 5px;
         }
 
         .btn:hover {
@@ -152,6 +163,14 @@
                 transform: translateY(-20px);
             }
         }
+
+        /* Estilos para la materia */
+        .materia-info {
+            font-size: 1.2rem;
+            color: #2E7D32;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -160,6 +179,8 @@
         <!-- Botón de Cerrar Sesión -->
         <button class="btn logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
         <h2 id="nombre-maestro">Panel de Maestros</h2>
+        <!-- Información de la materia -->
+        <div id="materia-info" class="materia-info"></div>
         <!-- Filtros -->
         <input type="text" id="buscar-alumno" placeholder="Buscar por nombre o matrícula" oninput="filtrarAlumnos()">
         <select id="filtro-estado" onchange="filtrarAlumnos()">
@@ -193,12 +214,13 @@
                 return;
             }
 
-            // Mostrar el nombre del maestro
+            // Mostrar el nombre del maestro y la materia
             let maestros = JSON.parse(localStorage.getItem('maestros')) || [];
             let maestro = maestros.find(m => m.id === maestroId);
 
             if (maestro) {
                 document.getElementById('nombre-maestro').textContent = `Bienvenido, ${maestro.nombre}`;
+                document.getElementById('materia-info').textContent = `Materia: ${maestro.materia || 'No asignada'}`;
             }
         }
 
