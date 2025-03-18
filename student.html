@@ -3,143 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calificaciones del Alumno - CBT</title>
-    <!-- Incluir SweetAlert2 -->
+    <title>Calificaciones del Estudiante - CBT</title>
+    <!-- Incluir SweetAlert2 para mensajes de error -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: #F4F4F4;
-            color: #333333;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
-        .header {
-            width: 100%;
-            background-color: #2E7D32;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 30px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
-        .header h1 {
-            font-size: 1.8rem;
-            margin: 0;
-            text-align: center;
-            flex: 1;
-        }
-        .logout-button {
-            padding: 10px 20px;
-            background-color: #FFD700;
-            color: #003300;
+        .container {
+            background-color: #fff;
+            padding: 20px;
             border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-left: 20px;
-        }
-        .logout-button:hover {
-            background-color: #006400;
-            color: white;
-        }
-        #student-content {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 80%;
-            max-width: 1200px;
-            margin-top: 100px;
+            max-width: 600px;
             text-align: center;
         }
-        .content-box {
-            width: 100%;
-            margin: 20px auto;
-            background: white;
-            color: #2E7D32;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            transition: transform 0.3s;
+        .info {
+            margin-bottom: 20px;
         }
-        .content-box:hover {
-            transform: translateY(-5px);
-        }
-        .content-box h2 {
-            font-size: 2.5rem;
-            color: #003300;
+        .info p {
+            margin: 10px 0;
+            font-size: 1.1rem;
         }
         .grades-table {
             width: 100%;
-            margin-top: 20px;
             border-collapse: collapse;
-            text-align: left;
+            margin-top: 20px;
         }
         .grades-table th, .grades-table td {
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ddd;
         }
         .grades-table th {
-            background-color: #81C784;
+            background-color: #2E7D32;
             color: white;
         }
         .grades-table td {
             background-color: #f9f9f9;
         }
-        .grades-table .final-grade {
+        .no-grades {
+            color: #d32f2f;
             font-weight: bold;
-            color: #2E7D32;
+            margin-top: 20px;
         }
         .footer {
-            text-align: center;
-            padding: 15px;
-            background-color: #2E7D32;
-            color: white;
             margin-top: 20px;
             font-size: 0.9rem;
-            width: 100%;
-        }
-        .download-buttons {
-            margin-top: 20px;
-        }
-        .download-buttons button {
-            padding: 10px 15px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .download-buttons .pdf {
-            background-color: #FFD700;
-        }
-        .download-buttons .excel {
-            background-color: #4CAF50;
-            color: white;
+            color: #777;
         }
     </style>
 </head>
 <body onload="cargarDatos()">
-    <header class="header">
-        <h1 id="student-name">Bienvenido</h1>
-        <div class="logout-button" onclick="cerrarSesion()">Cerrar Sesión</div>
-    </header>
-    <main id="student-content">
-        <section class="content-box">
+    <div class="container">
+        <div class="info">
             <h2>Información del Estudiante</h2>
             <p><strong>Nombre:</strong> <span id="info-nombre"></span></p>
             <p><strong>Matrícula:</strong> <span id="info-matricula"></span></p>
             <p><strong>Correo:</strong> <span id="info-correo"></span></p>
-        </section>
-        <section class="content-box">
+        </div>
+        <div id="grades-section">
             <h2>Calificaciones</h2>
-            <table class="grades-table">
+            <table class="grades-table" id="grades-table">
                 <thead>
                     <tr>
                         <th>Materia</th>
@@ -152,119 +85,74 @@
                 </thead>
                 <tbody id="grades-body"></tbody>
             </table>
-            <p id="promedio-general" style="font-size: 1.2rem; font-weight: bold; margin-top: 20px; color: #2E7D32;"></p>
-        </section>
-        <div class="download-buttons">
-            <button class="pdf" onclick="descargarPDF()">Descargar PDF</button>
-            <button class="excel" onclick="descargarExcel()">Descargar Excel</button>
+            <p id="no-grades" class="no-grades" style="display: none;">No hay calificaciones registradas.</p>
         </div>
-    </main>
-    <footer class="footer">
-        <p>&copy; 2025 CBT Profesor Luis Camarena González</p>
-    </footer>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <div class="footer">
+            © 2025 IGTI | Protector Luis Cantarrona González
+        </div>
+    </div>
+
     <script>
         function cargarDatos() {
-            let urlParams = new URLSearchParams(window.location.search);
-            let matricula = urlParams.get('matricula');
+            // Obtener la matrícula del estudiante desde localStorage
+            const matricula = localStorage.getItem('matricula');
 
             if (!matricula) {
+                // Si no hay matrícula, mostrar error y redirigir
                 Swal.fire({
                     title: 'Error',
                     text: 'No has iniciado sesión.',
                     icon: 'error',
                     confirmButtonText: 'OK',
                 }).then(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = 'index.html'; // Redirigir a la página de inicio
                 });
                 return;
             }
 
-            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
-            let alumnoEncontrado = null;
-
-            grupos.forEach(grupo => {
-                let alumno = grupo.alumnos.find(a => a.matricula === matricula);
-                if (alumno) {
-                    alumnoEncontrado = alumno;
-                }
-            });
+            // Obtener los datos del estudiante desde localStorage
+            const alumnos = JSON.parse(localStorage.getItem('alumnos')) || [];
+            const alumnoEncontrado = alumnos.find(a => a.matricula === matricula);
 
             if (alumnoEncontrado) {
-                document.getElementById("student-name").textContent = `Bienvenido, ${alumnoEncontrado.nombre}`;
-                document.getElementById("info-nombre").textContent = alumnoEncontrado.nombre;
-                document.getElementById("info-matricula").textContent = matricula;
-                document.getElementById("info-correo").textContent = `al${matricula}@cbt.com`;
+                // Mostrar información del estudiante
+                document.getElementById('info-nombre').textContent = alumnoEncontrado.nombre;
+                document.getElementById('info-matricula').textContent = matricula;
+                document.getElementById('info-correo').textContent = alumnoEncontrado.correo || `al${matricula}@cbt.com`;
 
-                let tbody = document.getElementById("grades-body");
+                // Mostrar calificaciones si existen
+                const tbody = document.getElementById('grades-body');
                 tbody.innerHTML = "";
-                let sumaFinal = 0;
-                let contador = 0;
 
-                grupos.forEach(grupo => {
-                    let alumno = grupo.alumnos.find(a => a.matricula === matricula);
-                    if (alumno && alumno.calificaciones) {
-                        alumno.calificaciones.forEach(calificacion => {
-                            let cf = calificacion.cf;
-                            sumaFinal += parseFloat(cf);
-                            contador++;
-                            let fila = `
-                                <tr>
-                                    <td>${calificacion.materia}</td>
-                                    <td>${calificacion.profesor}</td>
-                                    <td>${calificacion.p1}</td>
-                                    <td>${calificacion.p2}</td>
-                                    <td>${calificacion.p3}</td>
-                                    <td class="final-grade">${cf}</td>
-                                </tr>
-                            `;
-                            tbody.innerHTML += fila;
-                        });
-                    }
-                });
-
-                if (contador > 0) {
-                    document.getElementById("promedio-general").textContent = `Promedio General: ${(sumaFinal / contador).toFixed(1)}`;
+                if (alumnoEncontrado.calificaciones && alumnoEncontrado.calificaciones.length > 0) {
+                    alumnoEncontrado.calificaciones.forEach(calificacion => {
+                        const fila = `
+                            <tr>
+                                <td>${calificacion.materia}</td>
+                                <td>${calificacion.profesor}</td>
+                                <td>${calificacion.p1}</td>
+                                <td>${calificacion.p2}</td>
+                                <td>${calificacion.p3}</td>
+                                <td>${calificacion.cf}</td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += fila;
+                    });
                 } else {
-                    document.getElementById("promedio-general").textContent = "No hay calificaciones registradas.";
+                    // Si no hay calificaciones, mostrar mensaje
+                    document.getElementById('no-grades').style.display = "block";
                 }
             } else {
+                // Si no se encuentra al alumno, mostrar error
                 Swal.fire({
                     title: 'Error',
                     text: 'No se encontró información para la matrícula proporcionada.',
                     icon: 'error',
                     confirmButtonText: 'OK',
                 }).then(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = 'index.html'; // Redirigir a la página de inicio
                 });
             }
-        }
-
-        function cerrarSesion() {
-            Swal.fire({
-                title: '¿Cerrar sesión?',
-                text: '¿Estás seguro de que deseas cerrar sesión?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, cerrar sesión',
-                cancelButtonText: 'Cancelar',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = 'index.html';
-                }
-            });
-        }
-
-        function descargarPDF() {
-            html2pdf().from(document.getElementById("student-content")).save("calificaciones.pdf");
-        }
-
-        function descargarExcel() {
-            let wb = XLSX.utils.book_new();
-            let ws = XLSX.utils.table_to_sheet(document.querySelector(".grades-table"));
-            XLSX.utils.book_append_sheet(wb, ws, "Calificaciones");
-            XLSX.writeFile(wb, "calificaciones.xlsx");
         }
     </script>
 </body>

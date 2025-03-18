@@ -180,3 +180,33 @@ button:active {
         padding: 8px;
     }
 }
+/* Estilos para el menú hamburguesa */
+.menu-icon {
+    display: none; /* Ocultar por defecto */
+    font-size: 24px;
+    cursor: pointer;
+    color: white;
+    margin-right: 20px;
+}
+
+@media (max-width: 768px) {
+    .menu-icon {
+        display: block; /* Mostrar solo en pantallas pequeñas */
+    }
+
+    .header-buttons {
+        display: none; /* Ocultar los botones en pantallas pequeñas */
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        background-color: #2E7D32;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-buttons.active {
+        display: flex; /* Mostrar los botones cuando el menú está activo */
+    }
+}

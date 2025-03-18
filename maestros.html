@@ -6,6 +6,8 @@
     <title>Panel de Maestros - CBT</title>
     <!-- Incluir SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Incluir XLSX para manejar archivos de Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
     <style>
         /* Estilos Globales */
         body {
@@ -181,6 +183,14 @@
         <h2 id="nombre-maestro">Panel de Maestros</h2>
         <!-- Información de la materia -->
         <div id="materia-info" class="materia-info"></div>
+
+        <!-- Nuevo: Campo para importar archivos -->
+        <div style="margin-bottom: 20px;">
+            <input type="file" id="file-input" accept=".xlsx, .xls, .csv" style="display: none;">
+            <button class="btn" onclick="document.getElementById('file-input').click()">Importar Calificaciones</button>
+            <button class="btn" onclick="procesarArchivo()">Procesar Archivo</button>
+        </div>
+
         <!-- Filtros -->
         <input type="text" id="buscar-alumno" placeholder="Buscar por nombre o matrícula" oninput="filtrarAlumnos()">
         <select id="filtro-estado" onchange="filtrarAlumnos()">
@@ -486,6 +496,99 @@
                     }
                 });
             }
+        }
+
+        // Función para procesar el archivo importado
+        function procesarArchivo() {
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Por favor, selecciona un archivo.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // Obtener la primera hoja del archivo
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+
+                // Convertir la hoja a JSON
+                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                // Procesar los datos (por ejemplo, mostrar en una tabla)
+                procesarDatosCalificaciones(jsonData);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Función para procesar los datos del archivo
+        function procesarDatosCalificaciones(data) {
+            // Verificar que el archivo tenga el formato correcto
+            if (data.length === 0 || data[0].length < 6) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'El archivo no tiene el formato correcto. Debe tener al menos 6 columnas: Nombre, Matrícula, Calif1, Calif2, Calif3, Comentarios.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+                return;
+            }
+
+            // Obtener el grupo actual del maestro
+            let urlParams = new URLSearchParams(window.location.search);
+            let maestroId = urlParams.get('maestro');
+            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
+            let grupo = grupos.find(g => g.maestro === maestroId);
+
+            if (!grupo) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No tienes grupos asignados.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+                return;
+            }
+
+            // Procesar cada fila del archivo
+            for (let i = 1; i < data.length; i++) {
+                const [nombre, matricula, calif1, calif2, calif3, comentario] = data[i];
+
+                // Buscar al alumno en el grupo por matrícula
+                let alumno = grupo.alumnos.find(a => a.matricula === matricula);
+
+                if (alumno) {
+                    // Actualizar las calificaciones y comentarios
+                    alumno.calif1 = parseFloat(calif1) || 0;
+                    alumno.calif2 = parseFloat(calif2) || 0;
+                    alumno.calif3 = parseFloat(calif3) || 0;
+                    alumno.comentario = comentario || '';
+                    alumno.calificacionFinal = ((alumno.calif1 + alumno.calif2 + alumno.calif3) / 3).toFixed(2);
+                }
+            }
+
+            // Guardar los cambios en localStorage
+            localStorage.setItem('grupos', JSON.stringify(grupos));
+
+            // Recargar la tabla
+            cargarGruposMaestro();
+
+            Swal.fire({
+                title: 'Éxito',
+                text: 'Calificaciones importadas correctamente.',
+                icon: 'success',
+                confirmButtonText: 'OK',
+            });
         }
 
         // Cargar los grupos asignados al maestro al cargar la página

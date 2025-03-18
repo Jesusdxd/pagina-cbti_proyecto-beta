@@ -348,13 +348,41 @@
         body.dark-mode .stat-box p {
             color: #ffffff;
         }
+
+        /* Menú Hamburguesa */
+        .menu-icon {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .menu-icon {
+                display: block;
+            }
+            .header-buttons {
+                display: none;
+            }
+            .header-buttons.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                right: 20px;
+                background-color: #2E7D32;
+                padding: 10px;
+                border-radius: 5px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+        }
     </style>
 </head>
 <body onload="cargarAdminDatos()">
     <!-- Barra de encabezado más compacta -->
     <header>
         <h1 id="admin-name">Panel de Administración</h1>
-        <div class="header-buttons">
+        <div class="menu-icon" onclick="toggleMenu()">☰</div>
+        <div class="header-buttons" id="header-buttons">
             <input type="text" id="search-input" placeholder="Buscar alumno..." oninput="buscarAlumno()" aria-label="Buscar alumno">
             <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="Cambiar modo oscuro">🌙</button>
             <button class="logout-button" onclick="logout()" aria-label="Cerrar sesión">Cerrar Sesión</button>
@@ -1167,6 +1195,12 @@
 
             cargarAdminDatos();
         };
+
+        // Función para mostrar/ocultar el menú hamburguesa
+        function toggleMenu() {
+            const headerButtons = document.getElementById('header-buttons');
+            headerButtons.classList.toggle('active');
+        }
     </script>
 </body>
 </html>
