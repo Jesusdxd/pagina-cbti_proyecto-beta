@@ -119,6 +119,17 @@
             background-color: #b71c1c;
         }
 
+        /* Estilos para calificaciones */
+        .reprobatoria {
+            color: red;
+            font-weight: bold;
+        }
+
+        .aprobatoria {
+            color: green;
+            font-weight: bold;
+        }
+
         /* Animación de fondo */
         body::before {
             content: '';
@@ -149,12 +160,22 @@
         <!-- Botón de Cerrar Sesión -->
         <button class="btn logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
         <h2 id="nombre-maestro">Panel de Maestros</h2>
+        <!-- Filtros -->
+        <input type="text" id="buscar-alumno" placeholder="Buscar por nombre o matrícula" oninput="filtrarAlumnos()">
+        <select id="filtro-estado" onchange="filtrarAlumnos()">
+            <option value="todos">Todos</option>
+            <option value="aprobados">Aprobados</option>
+            <option value="reprobados">Reprobados</option>
+        </select>
         <div id="grupos-asignados">
             <!-- Aquí se cargarán los grupos asignados al maestro -->
         </div>
     </div>
 
     <script>
+        // Variables globales
+        let cambiosNoGuardados = false;
+
         // Función para validar la sesión del maestro
         function validarSesion() {
             let urlParams = new URLSearchParams(window.location.search);
@@ -201,12 +222,20 @@
                 grupoElement.classList.add('grupo');
                 grupoElement.innerHTML = `
                     <h3>Grupo: ${grupo.nombre}</h3>
+                    <button onclick="ordenarAlumnos('${grupo.id}', 'calificacion')">Ordenar por Calificación</button>
+                    <button onclick="ordenarAlumnos('${grupo.id}', 'nombre')">Ordenar por Nombre</button>
+                    <button onclick="mostrarEstadisticas('${grupo.id}')">Ver Estadísticas</button>
+                    <button onclick="exportarCSV('${grupo.id}')">Exportar a CSV</button>
                     <table>
                         <thead>
                             <tr>
                                 <th>Nombre</th>
                                 <th>Matrícula</th>
-                                <th>Calificación</th>
+                                <th>Calif1</th>
+                                <th>Calif2</th>
+                                <th>Calif3</th>
+                                <th>Calificación Final</th>
+                                <th>Comentarios</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -215,15 +244,71 @@
                                     <td>${alumno.nombre}</td>
                                     <td>${alumno.matricula}</td>
                                     <td>
-                                        <input type="number" id="calificacion-${alumno.matricula}" value="${alumno.calificacion || ''}" min="0" max="10">
+                                        <input type="number" class="calif" id="calif1-${alumno.matricula}" value="${alumno.calif1 || ''}" min="5" max="10" oninput="validarCalificacion(this); calcularCalificacionFinal('${alumno.matricula}'); marcarCambios()">
+                                    </td>
+                                    <td>
+                                        <input type="number" class="calif" id="calif2-${alumno.matricula}" value="${alumno.calif2 || ''}" min="5" max="10" oninput="validarCalificacion(this); calcularCalificacionFinal('${alumno.matricula}'); marcarCambios()">
+                                    </td>
+                                    <td>
+                                        <input type="number" class="calif" id="calif3-${alumno.matricula}" value="${alumno.calif3 || ''}" min="5" max="10" oninput="validarCalificacion(this); calcularCalificacionFinal('${alumno.matricula}'); marcarCambios()">
+                                    </td>
+                                    <td>
+                                        <span id="calificacion-final-${alumno.matricula}" class="calificacion-final">${alumno.calificacionFinal || '0.00'}</span>
+                                    </td>
+                                    <td>
+                                        <textarea class="comentario" id="comentario-${alumno.matricula}">${alumno.comentario || ''}</textarea>
                                     </td>
                                 </tr>
                             `).join('')}
                         </tbody>
                     </table>
-                    <button onclick="guardarCalificaciones('${grupo.id}')">Guardar Calificaciones</button>`;
+                    <button onclick="guardarCalificaciones('${grupo.id}')">Guardar Calificaciones</button>
+                    <button onclick="guardarComentarios('${grupo.id}')">Guardar Comentarios</button>`;
                 container.appendChild(grupoElement);
             });
+
+            // Aplicar estilos iniciales a las calificaciones finales
+            gruposMaestro.forEach(grupo => {
+                grupo.alumnos.forEach(alumno => {
+                    calcularCalificacionFinal(alumno.matricula);
+                });
+            });
+        }
+
+        // Función para calcular la calificación final
+        function calcularCalificacionFinal(matricula) {
+            let calif1 = parseFloat(document.getElementById(`calif1-${matricula}`).value) || 0;
+            let calif2 = parseFloat(document.getElementById(`calif2-${matricula}`).value) || 0;
+            let calif3 = parseFloat(document.getElementById(`calif3-${matricula}`).value) || 0;
+
+            let promedio = ((calif1 + calif2 + calif3) / 3).toFixed(2);
+            let calificacionFinal = document.getElementById(`calificacion-final-${matricula}`);
+
+            calificacionFinal.textContent = promedio;
+
+            // Aplicar estilos según la calificación
+            if (promedio < 6) {
+                calificacionFinal.className = 'calificacion-final reprobatoria';
+            } else {
+                calificacionFinal.className = 'calificacion-final aprobatoria';
+            }
+        }
+
+        // Función para validar calificaciones
+        function validarCalificacion(input) {
+            let valor = parseFloat(input.value);
+            if (isNaN(valor) || valor < 5 || valor > 10) {
+                input.style.borderColor = 'red';
+                Swal.fire({
+                    title: 'Error',
+                    text: 'La calificación debe estar entre 5 y 10.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                input.value = '';
+            } else {
+                input.style.borderColor = '#ddd';
+            }
         }
 
         // Función para guardar las calificaciones
@@ -232,21 +317,14 @@
             let grupo = grupos.find(g => g.id === grupoId);
 
             grupo.alumnos.forEach(alumno => {
-                let calificacion = document.getElementById(`calificacion-${alumno.matricula}`).value;
-                if (calificacion >= 0 && calificacion <= 10) {
-                    alumno.calificacion = calificacion;
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'La calificación debe estar entre 0 y 10.',
-                        icon: 'error',
-                        confirmButtonText: 'OK',
-                    });
-                    return;
-                }
+                alumno.calif1 = parseFloat(document.getElementById(`calif1-${alumno.matricula}`).value) || 0;
+                alumno.calif2 = parseFloat(document.getElementById(`calif2-${alumno.matricula}`).value) || 0;
+                alumno.calif3 = parseFloat(document.getElementById(`calif3-${alumno.matricula}`).value) || 0;
+                alumno.calificacionFinal = parseFloat(document.getElementById(`calificacion-final-${alumno.matricula}`).textContent) || 0;
             });
 
             localStorage.setItem('grupos', JSON.stringify(grupos));
+            cambiosNoGuardados = false;
             Swal.fire({
                 title: 'Éxito',
                 text: 'Calificaciones guardadas correctamente.',
@@ -255,25 +333,150 @@
             });
         }
 
-        // Función para cerrar sesión
-        function cerrarSesion() {
+        // Función para guardar los comentarios
+        function guardarComentarios(grupoId) {
+            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
+            let grupo = grupos.find(g => g.id === grupoId);
+
+            grupo.alumnos.forEach(alumno => {
+                alumno.comentario = document.getElementById(`comentario-${alumno.matricula}`).value;
+            });
+
+            localStorage.setItem('grupos', JSON.stringify(grupos));
             Swal.fire({
-                title: '¿Cerrar sesión?',
-                text: '¿Estás seguro de que deseas cerrar sesión?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, cerrar sesión',
-                cancelButtonText: 'Cancelar',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = 'index.html';
+                title: 'Éxito',
+                text: 'Comentarios guardados correctamente.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Función para exportar a CSV
+        function exportarCSV(grupoId) {
+            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
+            let grupo = grupos.find(g => g.id === grupoId);
+            let csvContent = "data:text/csv;charset=utf-8,Nombre,Matrícula,Calif1,Calif2,Calif3,Calificación Final,Comentarios\n";
+
+            grupo.alumnos.forEach(alumno => {
+                csvContent += `${alumno.nombre},${alumno.matricula},${alumno.calif1 || 0},${alumno.calif2 || 0},${alumno.calif3 || 0},${alumno.calificacionFinal || 0},"${alumno.comentario || ''}"\n`;
+            });
+
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `calificaciones_${grupo.nombre}.csv`);
+            document.body.appendChild(link);
+            link.click();
+        }
+
+        // Función para mostrar estadísticas
+        function mostrarEstadisticas(grupoId) {
+            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
+            let grupo = grupos.find(g => g.id === grupoId);
+            let aprobados = 0;
+            let reprobados = 0;
+            let sumaCalificaciones = 0;
+
+            grupo.alumnos.forEach(alumno => {
+                sumaCalificaciones += alumno.calificacionFinal || 0;
+                if (alumno.calificacionFinal >= 6) {
+                    aprobados++;
+                } else {
+                    reprobados++;
                 }
             });
+
+            let promedioGrupo = (sumaCalificaciones / grupo.alumnos.length).toFixed(2);
+
+            Swal.fire({
+                title: 'Estadísticas del Grupo',
+                html: `
+                    <p>Promedio del Grupo: ${promedioGrupo}</p>
+                    <p>Aprobados: ${aprobados}</p>
+                    <p>Reprobados: ${reprobados}</p>
+                `,
+                icon: 'info',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Función para ordenar alumnos
+        function ordenarAlumnos(grupoId, criterio) {
+            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
+            let grupo = grupos.find(g => g.id === grupoId);
+
+            if (criterio === 'calificacion') {
+                grupo.alumnos.sort((a, b) => (b.calificacionFinal || 0) - (a.calificacionFinal || 0));
+            } else if (criterio === 'nombre') {
+                grupo.alumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            }
+
+            localStorage.setItem('grupos', JSON.stringify(grupos));
+            cargarGruposMaestro();
+        }
+
+        // Función para filtrar alumnos
+        function filtrarAlumnos() {
+            let busqueda = document.getElementById('buscar-alumno').value.toLowerCase();
+            let filtroEstado = document.getElementById('filtro-estado').value;
+            let filas = document.querySelectorAll('.grupo tbody tr');
+
+            filas.forEach(fila => {
+                let nombre = fila.querySelector('td').textContent.toLowerCase();
+                let matricula = fila.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                let calificacionFinal = parseFloat(fila.querySelector('.calificacion-final').textContent);
+
+                let coincideBusqueda = nombre.includes(busqueda) || matricula.includes(busqueda);
+                let coincideEstado = filtroEstado === 'todos' ||
+                                    (filtroEstado === 'aprobados' && calificacionFinal >= 6) ||
+                                    (filtroEstado === 'reprobados' && calificacionFinal < 6);
+
+                fila.style.display = (coincideBusqueda && coincideEstado) ? '' : 'none';
+            });
+        }
+
+        // Función para cerrar sesión
+        function cerrarSesion() {
+            if (cambiosNoGuardados) {
+                Swal.fire({
+                    title: 'Cambios no guardados',
+                    text: 'Tienes cambios sin guardar. ¿Estás seguro de que deseas cerrar sesión?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cerrar sesión',
+                    cancelButtonText: 'Cancelar',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'index.html';
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: '¿Cerrar sesión?',
+                    text: '¿Estás seguro de que deseas cerrar sesión?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cerrar sesión',
+                    cancelButtonText: 'Cancelar',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'index.html';
+                    }
+                });
+            }
         }
 
         // Cargar los grupos asignados al maestro al cargar la página
         validarSesion();
         cargarGruposMaestro();
+
+        // Alerta de cambios no guardados al intentar salir
+        window.addEventListener('beforeunload', function (e) {
+            if (cambiosNoGuardados) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
     </script>
 
 </body>

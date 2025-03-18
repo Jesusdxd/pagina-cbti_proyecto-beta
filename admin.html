@@ -6,7 +6,7 @@
     <title>Panel de Administración - CBT</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Estilos Globales */
         body {
@@ -128,7 +128,7 @@
             margin-top: 60px;
             padding: 20px;
             max-width: 1200px;
-            margin-left: 0;
+            margin-left: auto;
             margin-right: auto;
         }
 
@@ -194,14 +194,14 @@
         /* Listado de Grupos */
         #group-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Ajustar el ancho mínimo */
+            gap: 30px; /* Aumentar el espacio entre los grupos */
             margin-top: 20px;
         }
 
         .group-container {
             background-color: #fff;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: box-shadow 0.3s ease, transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
@@ -301,6 +301,10 @@
             .groups-table th, .groups-table td {
                 padding: 8px;
                 font-size: 0.9rem;
+            }
+            #group-list {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Menos columnas en pantallas pequeñas */
+                gap: 20px; /* Menos espacio en pantallas pequeñas */
             }
         }
 
@@ -405,6 +409,42 @@
                 <!-- Aquí se insertará la tabla de asignación de maestros -->
             </div>
         </section>
+
+        <!-- Gestión de Materias -->
+        <section class="content-box">
+            <h2>Gestión de Materias</h2>
+            <div class="admin-actions">
+                <button onclick="addSubject()" aria-label="Agregar materia">Agregar Materia</button>
+                <button onclick="assignSubjectToGroup()" aria-label="Asignar materia a grupo">Asignar Materia a Grupo</button>
+            </div>
+            <div id="subject-list">
+                <!-- Aquí se insertarán dinámicamente las materias -->
+            </div>
+        </section>
+
+        <!-- Horarios de Clases -->
+        <section class="content-box">
+            <h2>Horarios de Clases</h2>
+            <div id="schedule-list">
+                <!-- Aquí se insertarán dinámicamente los horarios -->
+            </div>
+        </section>
+
+        <!-- Tareas y Actividades -->
+        <section class="content-box">
+            <h2>Tareas y Actividades</h2>
+            <div id="task-list">
+                <!-- Aquí se insertarán dinámicamente las tareas -->
+            </div>
+        </section>
+
+        <!-- Reportes y Estadísticas -->
+        <section class="content-box">
+            <h2>Reportes y Estadísticas</h2>
+            <div id="report-list">
+                <!-- Aquí se insertarán dinámicamente los reportes -->
+            </div>
+        </section>
     </main>
 
     <!-- Pie de página -->
@@ -435,6 +475,7 @@
             document.getElementById("admin-name").textContent = `Bienvenido, ${adminEmail}`;
             cargarGrupos();
             cargarMaestros();
+            cargarMaterias();
             actualizarResumen();
             cargarGraficoAlumnosPorGrupo();
         }
@@ -443,8 +484,10 @@
         function actualizarResumen() {
             let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
             let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+            let materias = JSON.parse(localStorage.getItem("materias")) || [];
             document.getElementById("total-grupos").textContent = grupos.length;
             document.getElementById("total-maestros").textContent = maestros.length;
+            document.getElementById("total-materias").textContent = materias.length;
             let totalAlumnos = grupos.reduce((total, grupo) => total + grupo.alumnos.length, 0);
             document.getElementById("total-alumnos").textContent = totalAlumnos;
         }
@@ -540,34 +583,132 @@
         // Cargar maestros desde localStorage
         function cargarMaestros() {
             let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
-            // Aquí puedes agregar la lógica para mostrar los maestros en la interfaz
+            let teacherAssignment = document.getElementById("teacher-assignment");
+            teacherAssignment.innerHTML = `
+                <table class="groups-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Contraseña</th>
+                            <th>Materia</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${maestros.map(maestro => `
+                            <tr>
+                                <td>${maestro.nombre}</td>
+                                <td>${maestro.email}</td>
+                                <td>${maestro.password}</td>
+                                <td>${maestro.materia || 'No asignada'}</td>
+                                <td>
+                                    <button onclick="removeTeacher('${maestro.id}')" aria-label="Quitar maestro">Quitar</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // Cargar materias desde localStorage
+        function cargarMaterias() {
+            let materias = JSON.parse(localStorage.getItem("materias")) || [];
+            let subjectList = document.getElementById("subject-list");
+            subjectList.innerHTML = "";
+
+            // Agrupar materias por carrera
+            let materiasPorCarrera = {};
+            materias.forEach(materia => {
+                if (!materiasPorCarrera[materia.carrera]) {
+                    materiasPorCarrera[materia.carrera] = [];
+                }
+                materiasPorCarrera[materia.carrera].push(materia);
+            });
+
+            // Mostrar las materias organizadas por carrera
+            for (let carrera in materiasPorCarrera) {
+                let carreraSection = document.createElement("div");
+                carreraSection.innerHTML = `<h3>Carrera: ${carrera}</h3>`;
+                let table = document.createElement("table");
+                table.classList.add("groups-table");
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${materiasPorCarrera[carrera].map(materia => `
+                            <tr>
+                                <td>${materia.nombre}</td>
+                                <td>
+                                    <button onclick="removeSubject('${materia.id}')" aria-label="Quitar materia">Quitar</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                `;
+                carreraSection.appendChild(table);
+                subjectList.appendChild(carreraSection);
+            }
         }
 
         // Agregar un grupo
         function addGroup() {
             Swal.fire({
                 title: 'Agregar Grupo',
-                input: 'text',
-                inputLabel: 'Nombre del Grupo',
-                inputPlaceholder: 'Ingrese el nombre del grupo',
+                html: `
+                    <input type="text" id="group-name" class="swal2-input" placeholder="Nombre del Grupo">
+                    <select id="group-carrera" class="swal2-input">
+                        <option value="Informática">Informática</option>
+                        <option value="Administración">Administración</option>
+                        <option value="Contabilidad">Contabilidad</option>
+                        <option value="Electrónica">Electrónica</option>
+                    </select>
+                    <select id="group-grado" class="swal2-input">
+                        <option value="1">1°</option>
+                        <option value="2">2°</option>
+                        <option value="3">3°</option>
+                        <option value="4">4°</option>
+                        <option value="5">5°</option>
+                        <option value="6">6°</option>
+                    </select>
+                    <input type="text" id="group-grupo" class="swal2-input" placeholder="Grupo (Ej: A, B, C)">
+                `,
                 showCancelButton: true,
                 confirmButtonText: 'Agregar',
                 cancelButtonText: 'Cancelar',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'El nombre del grupo no puede estar vacío.';
+                preConfirm: () => {
+                    let nombreGrupo = document.getElementById('group-name').value;
+                    let carrera = document.getElementById('group-carrera').value;
+                    let grado = document.getElementById('group-grado').value;
+                    let grupo = document.getElementById('group-grupo').value;
+                    if (!nombreGrupo || !carrera || !grado || !grupo) {
+                        Swal.showValidationMessage('Todos los campos son obligatorios.');
                     }
+                    return { nombreGrupo, carrera, grado, grupo };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let nombreGrupo = result.value;
+                    let { nombreGrupo, carrera, grado, grupo } = result.value;
                     let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
                     let grupoExistente = grupos.find(g => g.nombre === nombreGrupo);
                     if (grupoExistente) {
                         mostrarNotificacion("Error", "El grupo ya existe.", "error");
                         return;
                     }
-                    let nuevoGrupo = { id: `grupo-${Date.now()}`, nombre: nombreGrupo, alumnos: [], maestro: null };
+                    let nuevoGrupo = { 
+                        id: `grupo-${Date.now()}`, 
+                        nombre: nombreGrupo, 
+                        carrera: carrera, 
+                        grado: grado, 
+                        grupo: grupo, 
+                        alumnos: [], 
+                        maestro: null 
+                    };
                     grupos.push(nuevoGrupo);
                     localStorage.setItem("grupos", JSON.stringify(grupos));
                     cargarGrupos();
@@ -654,6 +795,8 @@
                             email: studentEmail, 
                             password: studentPassword 
                         });
+                        // Ordenar alumnos por nombre
+                        grupo.alumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
                         localStorage.setItem("grupos", JSON.stringify(grupos));
                         cargarGrupos();
                         mostrarNotificacion("Éxito", "Alumno agregado correctamente.", "success");
@@ -692,20 +835,22 @@
                 title: 'Agregar Maestro',
                 html: `
                     <input type="text" id="teacher-name" class="swal2-input" placeholder="Nombre del Maestro">
+                    <input type="text" id="teacher-subject" class="swal2-input" placeholder="Materia que imparte">
                 `,
                 showCancelButton: true,
                 confirmButtonText: 'Agregar',
                 cancelButtonText: 'Cancelar',
                 preConfirm: () => {
                     let teacherName = document.getElementById('teacher-name').value;
-                    if (!teacherName) {
-                        Swal.showValidationMessage('El nombre del maestro no puede estar vacío.');
+                    let teacherSubject = document.getElementById('teacher-subject').value;
+                    if (!teacherName || !teacherSubject) {
+                        Swal.showValidationMessage('Todos los campos son obligatorios.');
                     }
-                    return { teacherName };
+                    return { teacherName, teacherSubject };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let { teacherName } = result.value;
+                    let { teacherName, teacherSubject } = result.value;
                     let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
                     // Generar correo y contraseña automáticamente
                     let teacherEmail = `prof.${teacherName.toLowerCase().replace(/\s+/g, '.')}@cbt.com`;
@@ -714,7 +859,8 @@
                         id: `maestro-${Date.now()}`, 
                         nombre: teacherName, 
                         email: teacherEmail, 
-                        password: teacherPassword 
+                        password: teacherPassword,
+                        materia: teacherSubject 
                     };
                     maestros.push(nuevoMaestro);
                     localStorage.setItem("maestros", JSON.stringify(maestros));
@@ -763,6 +909,130 @@
                         cargarGrupos();
                         mostrarNotificacion("Éxito", "Maestro asignado correctamente.", "success");
                     }
+                }
+            });
+        }
+
+        // Agregar una materia
+        function addSubject() {
+            Swal.fire({
+                title: 'Agregar Materia',
+                html: `
+                    <input type="text" id="subject-name" class="swal2-input" placeholder="Nombre de la Materia">
+                    <select id="subject-carrera" class="swal2-input">
+                        <option value="Informática">Informática</option>
+                        <option value="Administración">Administración</option>
+                        <option value="Contabilidad">Contabilidad</option>
+                        <option value="Electrónica">Electrónica</option>
+                    </select>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Agregar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    let subjectName = document.getElementById('subject-name').value;
+                    let subjectCarrera = document.getElementById('subject-carrera').value;
+                    if (!subjectName || !subjectCarrera) {
+                        Swal.showValidationMessage('Todos los campos son obligatorios.');
+                    }
+                    return { subjectName, subjectCarrera };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let { subjectName, subjectCarrera } = result.value;
+                    let materias = JSON.parse(localStorage.getItem("materias")) || [];
+                    let materiaExistente = materias.find(m => m.nombre === subjectName && m.carrera === subjectCarrera);
+                    if (materiaExistente) {
+                        mostrarNotificacion("Error", "La materia ya existe en esta carrera.", "error");
+                        return;
+                    }
+                    let nuevaMateria = { 
+                        id: `materia-${Date.now()}`, 
+                        nombre: subjectName,
+                        carrera: subjectCarrera 
+                    };
+                    materias.push(nuevaMateria);
+                    localStorage.setItem("materias", JSON.stringify(materias));
+                    cargarMaterias();
+                    mostrarNotificacion("Éxito", "Materia agregada correctamente.", "success");
+                }
+            });
+        }
+
+        // Asignar materia a un grupo
+        function assignSubjectToGroup() {
+            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+            let materias = JSON.parse(localStorage.getItem("materias")) || [];
+            if (grupos.length === 0 || materias.length === 0) {
+                mostrarNotificacion("Error", "No hay grupos o materias disponibles.", "error");
+                return;
+            }
+
+            let groupOptions = grupos.map(grupo => `<option value="${grupo.id}">${grupo.nombre} (${grupo.carrera})</option>`).join('');
+            Swal.fire({
+                title: 'Asignar Materia a Grupo',
+                html: `
+                    <select id="group-select" onchange="filtrarMateriasPorCarrera()">${groupOptions}</select>
+                    <select id="subject-select"></select>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Asignar',
+                cancelButtonText: 'Cancelar',
+                didOpen: () => {
+                    // Filtrar materias por la carrera del primer grupo seleccionado por defecto
+                    filtrarMateriasPorCarrera();
+                },
+                preConfirm: () => {
+                    let selectedGroupId = document.getElementById('group-select').value;
+                    let selectedSubjectId = document.getElementById('subject-select').value;
+                    return { selectedGroupId, selectedSubjectId };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let { selectedGroupId, selectedSubjectId } = result.value;
+                    let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+                    let grupo = grupos.find(g => g.id === selectedGroupId);
+                    if (grupo) {
+                        grupo.materias = grupo.materias || [];
+                        grupo.materias.push(selectedSubjectId);
+                        localStorage.setItem("grupos", JSON.stringify(grupos));
+                        cargarGrupos();
+                        mostrarNotificacion("Éxito", "Materia asignada correctamente.", "success");
+                    }
+                }
+            });
+        }
+
+        // Función para filtrar materias por la carrera del grupo seleccionado
+        function filtrarMateriasPorCarrera() {
+            let grupoId = document.getElementById('group-select').value;
+            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+            let grupo = grupos.find(g => g.id === grupoId);
+            let materias = JSON.parse(localStorage.getItem("materias")) || [];
+
+            // Filtrar materias por la carrera del grupo seleccionado
+            let materiasFiltradas = materias.filter(materia => materia.carrera === grupo.carrera);
+            let subjectOptions = materiasFiltradas.map(materia => `<option value="${materia.id}">${materia.nombre}</option>`).join('');
+            document.getElementById('subject-select').innerHTML = subjectOptions;
+        }
+
+        // Eliminar una materia
+        function removeSubject(subjectId) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#2E7D32',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let materias = JSON.parse(localStorage.getItem("materias")) || [];
+                    materias = materias.filter(m => m.id !== subjectId);
+                    localStorage.setItem("materias", JSON.stringify(materias));
+                    cargarMaterias();
+                    mostrarNotificacion("Éxito", "Materia eliminada correctamente.", "success");
                 }
             });
         }
