@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Incluir XLSX para manejar archivos de Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    <!-- Incluir FontAwesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* Estilos Globales */
         body {
@@ -18,9 +20,9 @@
             color: #333;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Cambiado a flex-start para permitir desplazamiento */
             min-height: 100vh;
-            overflow: hidden;
+            padding: 20px; /* Espaciado para que el contenido no toque los bordes */
         }
 
         .maestros-container {
@@ -33,6 +35,8 @@
             text-align: center;
             animation: fadeIn 1s ease-in-out;
             position: relative;
+            overflow-y: auto; /* Habilitar desplazamiento vertical */
+            max-height: 90vh; /* Limitar la altura para que no ocupe toda la pantalla */
         }
 
         @keyframes fadeIn {
@@ -60,6 +64,18 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .grupo h3 {
@@ -89,6 +105,10 @@
 
         .grupo tr:hover {
             background-color: #f1f1f1;
+        }
+
+        .grupo tr.selected {
+            background-color: #e0f7fa !important;
         }
 
         .grupo input[type="number"] {
@@ -173,31 +193,90 @@
             margin-bottom: 20px;
             font-weight: bold;
         }
+
+        /* Notificaciones */
+        .notificacion {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+
+        .notificacion.success {
+            background-color: #4CAF50;
+        }
+
+        .notificacion.error {
+            background-color: #F44336;
+        }
+
+        .notificacion.info {
+            background-color: #2196F3;
+        }
+
+        /* Indicador de carga */
+        #cargando {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .cargando-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 
     <div class="maestros-container">
         <!-- Botón de Cerrar Sesión -->
-        <button class="btn logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <button class="btn logout-btn" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
         <h2 id="nombre-maestro">Panel de Maestros</h2>
         <!-- Información de la materia -->
         <div id="materia-info" class="materia-info"></div>
 
-        <!-- Nuevo: Campo para importar archivos -->
+        <!-- Campo para importar archivos -->
         <div style="margin-bottom: 20px;">
-            <input type="file" id="file-input" accept=".xlsx, .xls, .csv" style="display: none;">
-            <button class="btn" onclick="document.getElementById('file-input').click()">Importar Calificaciones</button>
-            <button class="btn" onclick="procesarArchivo()">Procesar Archivo</button>
+            <input type="file" id="file-input" accept=".xlsx, .xls, .csv" multiple style="display: none;">
+            <button class="btn" onclick="document.getElementById('file-input').click()"><i class="fas fa-file-import"></i> Importar Calificaciones</button>
+            <button class="btn" onclick="procesarArchivos()"><i class="fas fa-cogs"></i> Procesar Archivos</button>
         </div>
 
         <!-- Filtros -->
-        <input type="text" id="buscar-alumno" placeholder="Buscar por nombre o matrícula" oninput="filtrarAlumnos()">
+        <input type="text" id="buscar-alumno" placeholder="Buscar por nombre, matrícula o calificación" oninput="filtrarAlumnos()">
         <select id="filtro-estado" onchange="filtrarAlumnos()">
             <option value="todos">Todos</option>
             <option value="aprobados">Aprobados</option>
             <option value="reprobados">Reprobados</option>
         </select>
+        <select id="filtro-grupo" onchange="filtrarAlumnos()">
+            <option value="todos">Todos los Grupos</option>
+            <!-- Opciones de grupos dinámicas -->
+        </select>
+
+        <!-- Indicador de carga -->
+        <div id="cargando">
+            <div class="cargando-spinner"></div>
+            <p>Cargando...</p>
+        </div>
+
+        <!-- Grupos asignados -->
         <div id="grupos-asignados">
             <!-- Aquí se cargarán los grupos asignados al maestro -->
         </div>
@@ -206,6 +285,7 @@
     <script>
         // Variables globales
         let cambiosNoGuardados = false;
+        let timeoutId;
 
         // Función para validar la sesión del maestro
         function validarSesion() {
@@ -254,10 +334,10 @@
                 grupoElement.classList.add('grupo');
                 grupoElement.innerHTML = `
                     <h3>Grupo: ${grupo.nombre}</h3>
-                    <button onclick="ordenarAlumnos('${grupo.id}', 'calificacion')">Ordenar por Calificación</button>
-                    <button onclick="ordenarAlumnos('${grupo.id}', 'nombre')">Ordenar por Nombre</button>
-                    <button onclick="mostrarEstadisticas('${grupo.id}')">Ver Estadísticas</button>
-                    <button onclick="exportarCSV('${grupo.id}')">Exportar a CSV</button>
+                    <button class="btn" onclick="ordenarAlumnos('${grupo.id}', 'calificacion')"><i class="fas fa-sort-amount-down"></i> Ordenar por Calificación</button>
+                    <button class="btn" onclick="ordenarAlumnos('${grupo.id}', 'nombre')"><i class="fas fa-sort-alpha-down"></i> Ordenar por Nombre</button>
+                    <button class="btn" onclick="mostrarEstadisticas('${grupo.id}')"><i class="fas fa-chart-bar"></i> Ver Estadísticas</button>
+                    <button class="btn" onclick="exportarCSV('${grupo.id}')"><i class="fas fa-file-export"></i> Exportar a CSV</button>
                     <table>
                         <thead>
                             <tr>
@@ -294,8 +374,8 @@
                             `).join('')}
                         </tbody>
                     </table>
-                    <button onclick="guardarCalificaciones('${grupo.id}')">Guardar Calificaciones</button>
-                    <button onclick="guardarComentarios('${grupo.id}')">Guardar Comentarios</button>`;
+                    <button class="btn" onclick="guardarCalificaciones('${grupo.id}')"><i class="fas fa-save"></i> Guardar Calificaciones</button>
+                    <button class="btn" onclick="guardarComentarios('${grupo.id}')"><i class="fas fa-comment"></i> Guardar Comentarios</button>`;
                 container.appendChild(grupoElement);
             });
 
@@ -331,12 +411,7 @@
             let valor = parseFloat(input.value);
             if (isNaN(valor) || valor < 5 || valor > 10) {
                 input.style.borderColor = 'red';
-                Swal.fire({
-                    title: 'Error',
-                    text: 'La calificación debe estar entre 5 y 10.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
+                mostrarNotificacion('La calificación debe estar entre 5 y 10.', 'error');
                 input.value = '';
             } else {
                 input.style.borderColor = '#ddd';
@@ -357,12 +432,7 @@
 
             localStorage.setItem('grupos', JSON.stringify(grupos));
             cambiosNoGuardados = false;
-            Swal.fire({
-                title: 'Éxito',
-                text: 'Calificaciones guardadas correctamente.',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            });
+            mostrarNotificacion('Calificaciones guardadas correctamente.', 'success');
         }
 
         // Función para guardar los comentarios
@@ -375,12 +445,7 @@
             });
 
             localStorage.setItem('grupos', JSON.stringify(grupos));
-            Swal.fire({
-                title: 'Éxito',
-                text: 'Comentarios guardados correctamente.',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            });
+            mostrarNotificacion('Comentarios guardados correctamente.', 'success');
         }
 
         // Función para exportar a CSV
@@ -451,19 +516,22 @@
         function filtrarAlumnos() {
             let busqueda = document.getElementById('buscar-alumno').value.toLowerCase();
             let filtroEstado = document.getElementById('filtro-estado').value;
+            let filtroGrupo = document.getElementById('filtro-grupo').value;
             let filas = document.querySelectorAll('.grupo tbody tr');
 
             filas.forEach(fila => {
                 let nombre = fila.querySelector('td').textContent.toLowerCase();
                 let matricula = fila.querySelector('td:nth-child(2)').textContent.toLowerCase();
                 let calificacionFinal = parseFloat(fila.querySelector('.calificacion-final').textContent);
+                let grupo = fila.closest('.grupo').querySelector('h3').textContent.toLowerCase();
 
                 let coincideBusqueda = nombre.includes(busqueda) || matricula.includes(busqueda);
                 let coincideEstado = filtroEstado === 'todos' ||
                                     (filtroEstado === 'aprobados' && calificacionFinal >= 6) ||
                                     (filtroEstado === 'reprobados' && calificacionFinal < 6);
+                let coincideGrupo = filtroGrupo === 'todos' || grupo.includes(filtroGrupo);
 
-                fila.style.display = (coincideBusqueda && coincideEstado) ? '' : 'none';
+                fila.style.display = (coincideBusqueda && coincideEstado && coincideGrupo) ? '' : 'none';
             });
         }
 
@@ -499,76 +567,71 @@
         }
 
         // Función para procesar el archivo importado
-        function procesarArchivo() {
+        function procesarArchivos() {
             const fileInput = document.getElementById('file-input');
-            const file = fileInput.files[0];
+            const files = fileInput.files;
 
-            if (!file) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Por favor, selecciona un archivo.',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                });
+            if (!files || files.length === 0) {
+                mostrarNotificacion('Por favor, selecciona al menos un archivo.', 'error');
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
+            mostrarCargando();
+            let promesas = [];
+            for (let i = 0; i < files.length; i++) {
+                promesas.push(procesarArchivo(files[i]));
+            }
 
-                // Obtener la primera hoja del archivo
-                const sheetName = workbook.SheetNames[0];
-                const sheet = workbook.Sheets[sheetName];
+            Promise.all(promesas).then(() => {
+                ocultarCargando();
+                mostrarNotificacion('Todos los archivos han sido procesados correctamente.', 'success');
+            }).catch(error => {
+                ocultarCargando();
+                mostrarNotificacion('Hubo un error al procesar los archivos.', 'error');
+            });
+        }
 
-                // Convertir la hoja a JSON
-                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        // Función para procesar un archivo individual
+        function procesarArchivo(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
 
-                // Procesar los datos (por ejemplo, mostrar en una tabla)
-                procesarDatosCalificaciones(jsonData);
-            };
-            reader.readAsArrayBuffer(file);
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                    if (jsonData.length === 0 || jsonData[0].length < 6) {
+                        reject('El archivo no tiene el formato correcto.');
+                        return;
+                    }
+
+                    procesarDatosCalificaciones(jsonData);
+                    resolve();
+                };
+                reader.readAsArrayBuffer(file);
+            });
         }
 
         // Función para procesar los datos del archivo
         function procesarDatosCalificaciones(data) {
-            // Verificar que el archivo tenga el formato correcto
-            if (data.length === 0 || data[0].length < 6) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'El archivo no tiene el formato correcto. Debe tener al menos 6 columnas: Nombre, Matrícula, Calif1, Calif2, Calif3, Comentarios.',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                });
-                return;
-            }
-
-            // Obtener el grupo actual del maestro
             let urlParams = new URLSearchParams(window.location.search);
             let maestroId = urlParams.get('maestro');
             let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
             let grupo = grupos.find(g => g.maestro === maestroId);
 
             if (!grupo) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No tienes grupos asignados.',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                });
+                mostrarNotificacion('No tienes grupos asignados.', 'error');
                 return;
             }
 
-            // Procesar cada fila del archivo
             for (let i = 1; i < data.length; i++) {
                 const [nombre, matricula, calif1, calif2, calif3, comentario] = data[i];
-
-                // Buscar al alumno en el grupo por matrícula
                 let alumno = grupo.alumnos.find(a => a.matricula === matricula);
 
                 if (alumno) {
-                    // Actualizar las calificaciones y comentarios
                     alumno.calif1 = parseFloat(calif1) || 0;
                     alumno.calif2 = parseFloat(calif2) || 0;
                     alumno.calif3 = parseFloat(calif3) || 0;
@@ -577,18 +640,30 @@
                 }
             }
 
-            // Guardar los cambios en localStorage
             localStorage.setItem('grupos', JSON.stringify(grupos));
-
-            // Recargar la tabla
             cargarGruposMaestro();
+        }
 
-            Swal.fire({
-                title: 'Éxito',
-                text: 'Calificaciones importadas correctamente.',
-                icon: 'success',
-                confirmButtonText: 'OK',
-            });
+        // Función para mostrar notificaciones
+        function mostrarNotificacion(mensaje, tipo) {
+            const notificacion = document.createElement('div');
+            notificacion.className = `notificacion ${tipo}`;
+            notificacion.textContent = mensaje;
+            document.body.appendChild(notificacion);
+
+            setTimeout(() => {
+                notificacion.remove();
+            }, 3000);
+        }
+
+        // Función para mostrar el indicador de carga
+        function mostrarCargando() {
+            document.getElementById('cargando').style.display = 'block';
+        }
+
+        // Función para ocultar el indicador de carga
+        function ocultarCargando() {
+            document.getElementById('cargando').style.display = 'none';
         }
 
         // Cargar los grupos asignados al maestro al cargar la página
