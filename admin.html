@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Estilos Globales */
+        /* ===== ESTILOS GLOBALES ===== */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -24,7 +24,7 @@
             color: #ffffff;
         }
 
-        /* Header más compacto */
+        /* ===== HEADER ===== */
         header {
             background-color: #2E7D32;
             color: white;
@@ -52,13 +52,44 @@
             font-size: 1.2rem;
         }
 
-        header .header-buttons {
+        /* ===== BREADCRUMBS (Navegación) ===== */
+        .breadcrumbs {
+            padding: 10px 15px;
+            background-color: #e9e9e9;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        body.dark-mode .breadcrumbs {
+            background-color: #2a2a2a;
+            color: #ddd;
+        }
+
+        .breadcrumbs span {
+            color: #2E7D32;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        body.dark-mode .breadcrumbs span {
+            color: #4CAF50;
+        }
+
+        .breadcrumbs span:first-child {
+            margin-left: 0;
+        }
+
+        /* ===== BOTONES DEL HEADER ===== */
+        .header-buttons {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        header .logout-button {
+        .logout-button {
             background-color: #d32f2f;
             color: white;
             border: none;
@@ -71,16 +102,16 @@
             margin-left: 10px;
         }
 
-        header .logout-button:hover {
+        .logout-button:hover {
             background-color: #c62828;
             transform: scale(1.05);
         }
 
-        header .logout-button:active {
+        .logout-button:active {
             transform: scale(0.95);
         }
 
-        /* Botón de modo oscuro con íconos */
+        /* Botón de modo oscuro */
         .dark-mode-toggle {
             background-color: #333;
             color: white;
@@ -123,7 +154,7 @@
             color: white;
         }
 
-        /* Contenedor principal */
+        /* ===== CONTENIDO PRINCIPAL ===== */
         main {
             margin-top: 60px;
             padding: 20px;
@@ -132,7 +163,7 @@
             margin-right: auto;
         }
 
-        /* Caja de contenido */
+        /* ===== CAJAS DE CONTENIDO ===== */
         .content-box {
             background-color: white;
             padding: 20px;
@@ -159,20 +190,155 @@
         }
 
         .content-box h2 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             margin-bottom: 20px;
             color: #2E7D32;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .content-box h2:hover {
+            color: #1B5E20;
         }
 
         body.dark-mode .content-box h2 {
             color: #4CAF50;
         }
 
+        body.dark-mode .content-box h2:hover {
+            color: #81C784;
+        }
+
+        /* ===== DASHBOARD MEJORADO ===== */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-box.highlight {
+            border-left: 4px solid #4CAF50;
+        }
+
+        .stat-box.warning {
+            border-left: 4px solid #FFC107;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 10px;
+            color: #2E7D32;
+        }
+
+        .stat-box h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .stat-box p {
+            margin: 10px 0;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+
+        .stat-box small {
+            display: block;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        body.dark-mode .stat-box {
+            background-color: #252525;
+        }
+
+        body.dark-mode .stat-icon {
+            color: #4CAF50;
+        }
+
+        body.dark-mode .stat-box h3 {
+            color: #eee;
+        }
+
+        body.dark-mode .stat-box p {
+            color: #4CAF50;
+        }
+
+        body.dark-mode .stat-box small {
+            color: #aaa;
+        }
+
+        /* ===== ACTIVIDAD RECIENTE ===== */
+        .recent-activity {
+            margin-top: 20px;
+        }
+
+        .activity-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .activity-list li {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .activity-list li:before {
+            content: "•";
+            color: #2E7D32;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-right: 10px;
+        }
+
+        .activity-list li:hover {
+            background-color: #f5f5f5;
+        }
+
+        body.dark-mode .activity-list li {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode .activity-list li:hover {
+            background-color: #333;
+        }
+
+        body.dark-mode .activity-list li:before {
+            color: #4CAF50;
+        }
+
+        /* ===== ACCIONES DEL ADMINISTRADOR ===== */
         .admin-actions {
             display: flex;
             justify-content: flex-start;
             gap: 15px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .admin-actions button {
@@ -191,11 +357,11 @@
             transform: scale(1.05);
         }
 
-        /* Listado de Grupos */
+        /* ===== LISTADO DE GRUPOS ===== */
         #group-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Ajustar el ancho mínimo */
-            gap: 30px; /* Aumentar el espacio entre los grupos */
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
             margin-top: 20px;
         }
 
@@ -218,12 +384,20 @@
             transform: translateY(-5px);
         }
 
+        /* ===== TABLAS ===== */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+            max-width: 100%;
+        }
+
         .groups-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             border-radius: 8px;
             overflow: hidden;
+            min-width: 600px;
         }
 
         .groups-table th,
@@ -256,7 +430,94 @@
             background-color: #333;
         }
 
-        /* Pie de página */
+        /* ===== DETALLES DE GRUPO ===== */
+        .group-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .teachers-section, .subjects-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .teacher-card, .subject-card {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.dark-mode .teacher-card,
+        body.dark-mode .subject-card {
+            background-color: #2a2a2a;
+        }
+
+        .teacher-info, .subject-info {
+            flex: 1;
+        }
+
+        .teacher-actions, .subject-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2E7D32;
+        }
+
+        body.dark-mode .section-title {
+            color: #4CAF50;
+        }
+
+        /* ===== IMPORTACIÓN/EXPORTACIÓN ===== */
+        .import-export-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-button {
+            background-color: #2E7D32;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .file-input-button:hover {
+            background-color: #1B5E20;
+            transform: scale(1.05);
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        /* ===== PIE DE PÁGINA ===== */
         footer {
             text-align: center;
             padding: 10px;
@@ -278,7 +539,7 @@
             to { transform: translateY(0); }
         }
 
-        /* Estilos Responsivos */
+        /* ===== ESTILOS RESPONSIVOS ===== */
         @media (max-width: 768px) {
             header {
                 flex-direction: column;
@@ -303,50 +564,18 @@
                 font-size: 0.9rem;
             }
             #group-list {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Menos columnas en pantallas pequeñas */
-                gap: 20px; /* Menos espacio en pantallas pequeñas */
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 20px;
             }
-        }
-
-        /* Estilos para el dashboard */
-        .dashboard-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .stat-box {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .stat-box h3 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: #2E7D32;
-        }
-
-        .stat-box p {
-            margin: 0;
-            font-size: 1.2rem;
-            color: #333;
-        }
-
-        body.dark-mode .stat-box {
-            background-color: #1e1e1e;
-            color: #ffffff;
-        }
-
-        body.dark-mode .stat-box h3 {
-            color: #4CAF50;
-        }
-
-        body.dark-mode .stat-box p {
-            color: #ffffff;
+            .group-details {
+                flex-direction: column;
+            }
+            .teachers-section, .subjects-section {
+                min-width: 100%;
+            }
+            .import-export-actions {
+                flex-direction: column;
+            }
         }
 
         /* Menú Hamburguesa */
@@ -378,7 +607,7 @@
     </style>
 </head>
 <body onload="cargarAdminDatos()">
-    <!-- Barra de encabezado más compacta -->
+    <!-- Barra de encabezado -->
     <header>
         <h1 id="admin-name">Panel de Administración</h1>
         <div class="menu-icon" onclick="toggleMenu()">☰</div>
@@ -391,38 +620,71 @@
 
     <!-- Contenido Principal -->
     <main>
-        <!-- Dashboard con Resumen General -->
+        <!-- Breadcrumbs para navegación -->
+        <div class="breadcrumbs">
+            <span>Panel de Administración</span> > <span id="current-section">Dashboard</span>
+        </div>
+
+        <!-- Dashboard con Resumen General Mejorado -->
         <section class="content-box">
-            <h2>Resumen General</h2>
+            <h2 onclick="updateBreadcrumb('Dashboard')">Resumen General</h2>
             <div class="dashboard-stats">
                 <div class="stat-box">
+                    <i class="stat-icon">👥</i>
                     <h3>Grupos</h3>
                     <p id="total-grupos">0</p>
+                    <small id="grupos-change">Cargando...</small>
                 </div>
-                <div class="stat-box">
+                <div class="stat-box highlight">
+                    <i class="stat-icon">👨‍🏫</i>
                     <h3>Maestros</h3>
                     <p id="total-maestros">0</p>
+                    <small id="maestros-change">Cargando...</small>
                 </div>
                 <div class="stat-box">
+                    <i class="stat-icon">📚</i>
                     <h3>Materias</h3>
                     <p id="total-materias">0</p>
+                    <small id="materias-change">Cargando...</small>
                 </div>
-                <div class="stat-box">
+                <div class="stat-box warning">
+                    <i class="stat-icon">🎓</i>
                     <h3>Alumnos</h3>
                     <p id="total-alumnos">0</p>
+                    <small id="alumnos-change">Cargando...</small>
                 </div>
             </div>
-            <canvas id="chart-alumnos-por-grupo"></canvas> <!-- Gráfico de alumnos por grupo -->
+
+            <!-- Gráfico de alumnos por grupo -->
+            <div style="margin-top: 30px;">
+                <canvas id="chart-alumnos-por-grupo"></canvas>
+            </div>
+
+            <!-- Actividad reciente -->
+            <div class="recent-activity">
+                <h3>Actividad Reciente</h3>
+                <ul class="activity-list" id="activity-list">
+                    <li>Cargando actividad reciente...</li>
+                </ul>
+            </div>
         </section>
 
         <!-- Gestión de Grupos y Alumnos -->
         <section class="content-box">
-            <h2>Gestión de Grupos y Alumnos</h2>
+            <h2 onclick="updateBreadcrumb('Gestión de Grupos')">Gestión de Grupos y Alumnos</h2>
             <div class="admin-actions">
                 <button onclick="addGroup()" aria-label="Agregar grupo">Agregar Grupo</button>
                 <button onclick="removeGroup()" aria-label="Quitar grupo">Quitar Grupo</button>
-                <button onclick="exportarDatos()" aria-label="Exportar datos">Exportar Datos</button>
                 <button onclick="addTeacher()" aria-label="Agregar maestro">Agregar Maestro</button>
+                <button onclick="addSubject()" aria-label="Agregar materia">Agregar Materia</button>
+            </div>
+
+            <div class="import-export-actions">
+                <button onclick="exportarDatos()" aria-label="Exportar datos">Exportar Datos</button>
+                <div class="file-input-container">
+                    <button class="file-input-button">Importar desde Excel</button>
+                    <input type="file" id="excel-import" class="file-input" accept=".xlsx, .xls" onchange="importarExcel(event)">
+                </div>
             </div>
 
             <div id="group-list">
@@ -430,45 +692,9 @@
             </div>
         </section>
 
-        <!-- Asignación de Maestros a Grupos y Materias -->
-        <section class="content-box">
-            <h2>Asignación de Maestros y Materias</h2>
-            <div id="teacher-assignment">
-                <!-- Aquí se insertará la tabla de asignación de maestros -->
-            </div>
-        </section>
-
-        <!-- Gestión de Materias -->
-        <section class="content-box">
-            <h2>Gestión de Materias</h2>
-            <div class="admin-actions">
-                <button onclick="addSubject()" aria-label="Agregar materia">Agregar Materia</button>
-                <button onclick="assignSubjectToGroup()" aria-label="Asignar materia a grupo">Asignar Materia a Grupo</button>
-            </div>
-            <div id="subject-list">
-                <!-- Aquí se insertarán dinámicamente las materias -->
-            </div>
-        </section>
-
-        <!-- Horarios de Clases -->
-        <section class="content-box">
-            <h2>Horarios de Clases</h2>
-            <div id="schedule-list">
-                <!-- Aquí se insertarán dinámicamente los horarios -->
-            </div>
-        </section>
-
-        <!-- Tareas y Actividades -->
-        <section class="content-box">
-            <h2>Tareas y Actividades</h2>
-            <div id="task-list">
-                <!-- Aquí se insertarán dinámicamente las tareas -->
-            </div>
-        </section>
-
         <!-- Reportes y Estadísticas -->
         <section class="content-box">
-            <h2>Reportes y Estadísticas</h2>
+            <h2 onclick="updateBreadcrumb('Reportes')">Reportes y Estadísticas</h2>
             <div id="report-list">
                 <!-- Aquí se insertarán dinámicamente los reportes -->
             </div>
@@ -481,18 +707,76 @@
     </footer>
 
     <script>
-        // Función para mostrar notificaciones con SweetAlert2
+        // ===== VARIABLES GLOBALES =====
+        let lastData = {
+            grupos: 0,
+            maestros: 0,
+            materias: 0,
+            alumnos: 0
+        };
+
+        // ===== FUNCIONES DE INTERFAZ =====
+
+        /**
+         * Muestra notificaciones al usuario usando SweetAlert2
+         * @param {string} titulo - Título de la notificación
+         * @param {string} mensaje - Mensaje a mostrar
+         * @param {string} tipo - Tipo de notificación (success, error, warning, info)
+         */
         function mostrarNotificacion(titulo, mensaje, tipo) {
             Swal.fire({
                 title: titulo,
                 text: mensaje,
                 icon: tipo,
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
             });
         }
 
-        // Cargar datos del administrador
+        /**
+         * Actualiza la barra de breadcrumb con la sección actual
+         * @param {string} section - Nombre de la sección actual
+         */
+        function updateBreadcrumb(section) {
+            document.getElementById('current-section').textContent = section;
+        }
+
+        /**
+         * Alterna entre modo oscuro y claro
+         */
+        function toggleDarkMode() {
+            const body = document.body;
+            const darkModeToggle = document.querySelector('.dark-mode-toggle');
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            localStorage.setItem('dark-mode', isDarkMode);
+
+            // Cambiar el ícono del botón según el modo actual
+            darkModeToggle.textContent = isDarkMode ? '🌞' : '🌙';
+            mostrarNotificacion("Modo " + (isDarkMode ? "oscuro" : "claro"), 
+                              "El tema se ha cambiado correctamente", 
+                              "success");
+        }
+
+        /**
+         * Muestra/oculta el menú en dispositivos móviles
+         */
+        function toggleMenu() {
+            const headerButtons = document.getElementById('header-buttons');
+            headerButtons.classList.toggle('active');
+        }
+
+        // ===== FUNCIONES PRINCIPALES =====
+
+        /**
+         * Carga los datos del administrador y actualiza la interfaz
+         */
         function cargarAdminDatos() {
+            // Verificar sesión
             let urlParams = new URLSearchParams(window.location.search);
             let adminEmail = urlParams.get('admin');
             if (!adminEmail) {
@@ -500,33 +784,244 @@
                 window.location.href = "index.html";
                 return;
             }
+            
+            // Actualizar interfaz
             document.getElementById("admin-name").textContent = `Bienvenido, ${adminEmail}`;
             cargarGrupos();
             cargarMaestros();
             cargarMaterias();
             actualizarResumen();
             cargarGraficoAlumnosPorGrupo();
+            cargarActividadReciente();
+            updateBreadcrumb('Dashboard');
         }
 
-        // Actualizar el resumen general
+        /**
+         * Carga y muestra la lista de grupos desde localStorage
+         */
+        function cargarGrupos() {
+            let groupContainer = document.getElementById("group-list");
+            groupContainer.innerHTML = "";
+            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+            let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+            let materias = JSON.parse(localStorage.getItem("materias")) || [];
+
+            if (grupos.length === 0) {
+                groupContainer.innerHTML = "<p>No hay grupos registrados.</p>";
+                return;
+            }
+
+            grupos.forEach(grupo => {
+                let groupElement = document.createElement("div");
+                groupElement.classList.add("group-container");
+                
+                // Obtener maestros asignados a este grupo
+                let maestrosAsignados = maestros.filter(m => grupo.maestros && grupo.maestros.includes(m.id));
+                
+                // Obtener materias asignadas a este grupo
+                let materiasAsignadas = materias.filter(m => grupo.materias && grupo.materias.includes(m.id));
+                
+                groupElement.innerHTML = 
+                    `<h3>Grupo: ${grupo.nombre} (${grupo.carrera})</h3>
+                    <div class="table-container">
+                        <table class="groups-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Matrícula</th>
+                                    <th>Correo</th>
+                                    <th>Contraseña</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="${grupo.id}">
+                                ${grupo.alumnos.map(alumno => 
+                                    `<tr>
+                                        <td>${alumno.nombre}</td>
+                                        <td>${alumno.matricula}</td>
+                                        <td>${alumno.email}</td>
+                                        <td>${alumno.password}</td>
+                                        <td>
+                                            <button onclick="removeStudent('${grupo.id}', '${alumno.matricula}')" aria-label="Quitar alumno">Quitar</button>
+                                        </td>
+                                    </tr>`
+                                ).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="group-details">
+                        <div class="teachers-section">
+                            <div class="section-title">Maestros Asignados (${maestrosAsignados.length})</div>
+                            ${maestrosAsignados.length > 0 ? 
+                                maestrosAsignados.map(maestro => `
+                                    <div class="teacher-card">
+                                        <div class="teacher-info">
+                                            <div><strong>${maestro.nombre}</strong></div>
+                                            <div>${maestro.materia || 'Sin materia asignada'}</div>
+                                        </div>
+                                        <div class="teacher-actions">
+                                            <button onclick="desasignarMaestro('${grupo.id}', '${maestro.id}')">Quitar</button>
+                                        </div>
+                                    </div>
+                                `).join('') : 
+                                '<p>No hay maestros asignados</p>'
+                            }
+                            <button onclick="asignarMaestro('${grupo.id}')" style="margin-top: 10px;">Asignar Maestro</button>
+                        </div>
+                        
+                        <div class="subjects-section">
+                            <div class="section-title">Materias del Grupo (${materiasAsignadas.length})</div>
+                            ${materiasAsignadas.length > 0 ? 
+                                materiasAsignadas.map(materia => `
+                                    <div class="subject-card">
+                                        <div class="subject-info">${materia.nombre}</div>
+                                        <div class="subject-actions">
+                                            <button onclick="desasignarMateria('${grupo.id}', '${materia.id}')">Quitar</button>
+                                        </div>
+                                    </div>
+                                `).join('') : 
+                                '<p>No hay materias asignadas</p>'
+                            }
+                            <button onclick="asignarMateria('${grupo.id}')" style="margin-top: 10px;">Agregar Materia</button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="addStudent('${grupo.id}')" aria-label="Agregar alumno" style="margin-top: 15px;">Agregar Alumno</button>`;
+                
+                groupContainer.appendChild(groupElement);
+            });
+        }
+
+        /**
+         * Carga los maestros desde localStorage (para uso interno)
+         * @returns {Array} Lista de maestros
+         */
+        function cargarMaestros() {
+            return JSON.parse(localStorage.getItem("maestros")) || [];
+        }
+
+        /**
+         * Carga las materias desde localStorage (para uso interno)
+         * @returns {Array} Lista de materias
+         */
+        function cargarMaterias() {
+            return JSON.parse(localStorage.getItem("materias")) || [];
+        }
+
+        /**
+         * Carga y muestra la actividad reciente desde localStorage
+         */
+        function cargarActividadReciente() {
+            let actividad = JSON.parse(localStorage.getItem("actividad")) || [];
+            let lista = document.getElementById("activity-list");
+            
+            if (actividad.length === 0) {
+                lista.innerHTML = "<li>No hay actividad reciente para mostrar</li>";
+                return;
+            }
+            
+            // Limitar a 5 elementos y ordenar del más reciente al más antiguo
+            actividad = actividad.slice(-5).reverse();
+            lista.innerHTML = actividad.map(item => `<li>${item}</li>`).join('');
+        }
+
+        /**
+         * Registra una nueva actividad en el historial
+         * @param {string} accion - Descripción de la acción realizada
+         */
+        function registrarActividad(accion) {
+            let actividad = JSON.parse(localStorage.getItem("actividad")) || [];
+            let fecha = new Date().toLocaleString();
+            actividad.push(`${fecha}: ${accion}`);
+            
+            // Limitar el historial a 50 elementos
+            if (actividad.length > 50) {
+                actividad = actividad.slice(-50);
+            }
+            
+            localStorage.setItem("actividad", JSON.stringify(actividad));
+            cargarActividadReciente();
+        }
+
+        // ===== FUNCIONES DE GESTIÓN =====
+
+        /**
+         * Actualiza el resumen general con datos actuales
+         */
         function actualizarResumen() {
             let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
             let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
             let materias = JSON.parse(localStorage.getItem("materias")) || [];
-            document.getElementById("total-grupos").textContent = grupos.length;
-            document.getElementById("total-maestros").textContent = maestros.length;
-            document.getElementById("total-materias").textContent = materias.length;
+            
+            // Calcular totales
+            let totalGrupos = grupos.length;
+            let totalMaestros = maestros.length;
+            let totalMaterias = materias.length;
             let totalAlumnos = grupos.reduce((total, grupo) => total + grupo.alumnos.length, 0);
+            
+            // Actualizar UI
+            document.getElementById("total-grupos").textContent = totalGrupos;
+            document.getElementById("total-maestros").textContent = totalMaestros;
+            document.getElementById("total-materias").textContent = totalMaterias;
             document.getElementById("total-alumnos").textContent = totalAlumnos;
+            
+            // Calcular cambios desde la última actualización
+            actualizarCambios(totalGrupos, totalMaestros, totalMaterias, totalAlumnos);
+            
+            // Guardar datos actuales para la próxima comparación
+            lastData = {
+                grupos: totalGrupos,
+                maestros: totalMaestros,
+                materias: totalMaterias,
+                alumnos: totalAlumnos
+            };
         }
 
-        // Cargar gráfico de alumnos por grupo
+        /**
+         * Calcula y muestra los cambios desde la última actualización
+         */
+        function actualizarCambios(grupos, maestros, materias, alumnos) {
+            // Grupos
+            let diffGrupos = grupos - lastData.grupos;
+            let gruposText = diffGrupos > 0 ? `+${diffGrupos} esta semana` : 
+                            diffGrupos < 0 ? `${diffGrupos} esta semana` : 'Sin cambios';
+            document.getElementById("grupos-change").textContent = gruposText;
+            
+            // Maestros
+            let diffMaestros = maestros - lastData.maestros;
+            let maestrosText = diffMaestros > 0 ? `+${diffMaestros} nuevos` : 
+                              diffMaestros < 0 ? `${diffMaestros} menos` : 'Sin cambios';
+            document.getElementById("maestros-change").textContent = maestrosText;
+            
+            // Materias
+            let diffMaterias = materias - lastData.materias;
+            let materiasText = diffMaterias > 0 ? `+${diffMaterias} nuevas` : 
+                              diffMaterias < 0 ? `${diffMaterias} menos` : 'Sin cambios';
+            document.getElementById("materias-change").textContent = materiasText;
+            
+            // Alumnos
+            let diffAlumnos = alumnos - lastData.alumnos;
+            let alumnosText = diffAlumnos > 0 ? `+${diffAlumnos} nuevos` : 
+                             diffAlumnos < 0 ? `${diffAlumnos} menos` : 'Sin cambios';
+            document.getElementById("alumnos-change").textContent = alumnosText;
+        }
+
+        /**
+         * Carga y muestra el gráfico de alumnos por grupo
+         */
         function cargarGraficoAlumnosPorGrupo() {
             let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
             let ctx = document.getElementById('chart-alumnos-por-grupo').getContext('2d');
             let labels = grupos.map(grupo => grupo.nombre);
             let data = grupos.map(grupo => grupo.alumnos.length);
-            new Chart(ctx, {
+            
+            // Si ya existe un gráfico, destruirlo antes de crear uno nuevo
+            if (window.alumnosChart) {
+                window.alumnosChart.destroy();
+            }
+            
+            window.alumnosChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
@@ -539,16 +1034,41 @@
                     }]
                 },
                 options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cantidad de Alumnos'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Grupos'
+                            }
                         }
                     }
                 }
             });
         }
 
-        // Cerrar sesión
+        /**
+         * Cierra la sesión del administrador
+         */
         function logout() {
             Swal.fire({
                 title: '¿Cerrar sesión?',
@@ -564,127 +1084,11 @@
             });
         }
 
-        // Cargar grupos desde localStorage
-        function cargarGrupos() {
-            let groupContainer = document.getElementById("group-list");
-            groupContainer.innerHTML = "";
-            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
-            if (grupos.length === 0) {
-                groupContainer.innerHTML = "<p>No hay grupos registrados.</p>";
-                return;
-            }
-            grupos.forEach(grupo => {
-                let groupElement = document.createElement("div");
-                groupElement.classList.add("group-container");
-                groupElement.innerHTML = 
-                    `<h3>Grupo: ${grupo.nombre}</h3>
-                    <table class="groups-table">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Matrícula</th>
-                                <th>Correo</th>
-                                <th>Contraseña</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="${grupo.id}">
-                            ${grupo.alumnos.map(alumno => 
-                                `<tr>
-                                    <td>${alumno.nombre}</td>
-                                    <td>${alumno.matricula}</td>
-                                    <td>${alumno.email}</td>
-                                    <td>${alumno.password}</td>
-                                    <td>
-                                        <button onclick="removeStudent('${grupo.id}', '${alumno.matricula}')" aria-label="Quitar alumno">Quitar</button>
-                                    </td>
-                                </tr>`
-                            ).join('')}
-                        </tbody>
-                    </table>
-                    <button onclick="addStudent('${grupo.id}')" aria-label="Agregar alumno">Agregar Alumno</button>
-                    <button onclick="assignTeacher('${grupo.id}')" aria-label="Asignar maestro">Asignar Maestro</button>`;
-                groupContainer.appendChild(groupElement);
-            });
-        }
+        // ===== FUNCIONES PARA GRUPOS =====
 
-        // Cargar maestros desde localStorage
-        function cargarMaestros() {
-            let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
-            let teacherAssignment = document.getElementById("teacher-assignment");
-            teacherAssignment.innerHTML = `
-                <table class="groups-table">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Correo</th>
-                            <th>Contraseña</th>
-                            <th>Materia</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${maestros.map(maestro => `
-                            <tr>
-                                <td>${maestro.nombre}</td>
-                                <td>${maestro.email}</td>
-                                <td>${maestro.password}</td>
-                                <td>${maestro.materia || 'No asignada'}</td>
-                                <td>
-                                    <button onclick="removeTeacher('${maestro.id}')" aria-label="Quitar maestro">Quitar</button>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-        }
-
-        // Cargar materias desde localStorage
-        function cargarMaterias() {
-            let materias = JSON.parse(localStorage.getItem("materias")) || [];
-            let subjectList = document.getElementById("subject-list");
-            subjectList.innerHTML = "";
-
-            // Agrupar materias por carrera
-            let materiasPorCarrera = {};
-            materias.forEach(materia => {
-                if (!materiasPorCarrera[materia.carrera]) {
-                    materiasPorCarrera[materia.carrera] = [];
-                }
-                materiasPorCarrera[materia.carrera].push(materia);
-            });
-
-            // Mostrar las materias organizadas por carrera
-            for (let carrera in materiasPorCarrera) {
-                let carreraSection = document.createElement("div");
-                carreraSection.innerHTML = `<h3>Carrera: ${carrera}</h3>`;
-                let table = document.createElement("table");
-                table.classList.add("groups-table");
-                table.innerHTML = `
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${materiasPorCarrera[carrera].map(materia => `
-                            <tr>
-                                <td>${materia.nombre}</td>
-                                <td>
-                                    <button onclick="removeSubject('${materia.id}')" aria-label="Quitar materia">Quitar</button>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                `;
-                carreraSection.appendChild(table);
-                subjectList.appendChild(carreraSection);
-            }
-        }
-
-        // Agregar un grupo
+        /**
+         * Agrega un nuevo grupo al sistema
+         */
         function addGroup() {
             Swal.fire({
                 title: 'Agregar Grupo',
@@ -734,18 +1138,23 @@
                         carrera: carrera, 
                         grado: grado, 
                         grupo: grupo, 
-                        alumnos: [], 
-                        maestro: null 
+                        alumnos: [],
+                        maestros: [],
+                        materias: []
                     };
                     grupos.push(nuevoGrupo);
                     localStorage.setItem("grupos", JSON.stringify(grupos));
                     cargarGrupos();
+                    actualizarResumen();
+                    registrarActividad(`Grupo ${nombreGrupo} creado`);
                     mostrarNotificacion("Éxito", "Grupo agregado correctamente.", "success");
                 }
             });
         }
 
-        // Eliminar un grupo
+        /**
+         * Elimina un grupo del sistema
+         */
         function removeGroup() {
             Swal.fire({
                 title: 'Eliminar Grupo',
@@ -777,6 +1186,8 @@
                             grupos = grupos.filter(g => g.nombre !== nombreGrupo);
                             localStorage.setItem("grupos", JSON.stringify(grupos));
                             cargarGrupos();
+                            actualizarResumen();
+                            registrarActividad(`Grupo ${nombreGrupo} eliminado`);
                             mostrarNotificacion("Éxito", "Grupo eliminado correctamente.", "success");
                         }
                     });
@@ -784,7 +1195,12 @@
             });
         }
 
-        // Agregar un alumno
+        // ===== FUNCIONES PARA ALUMNOS =====
+
+        /**
+         * Agrega un alumno a un grupo específico
+         * @param {string} groupId - ID del grupo al que se agregará el alumno
+         */
         function addStudent(groupId) {
             Swal.fire({
                 title: 'Agregar Alumno',
@@ -827,13 +1243,19 @@
                         grupo.alumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
                         localStorage.setItem("grupos", JSON.stringify(grupos));
                         cargarGrupos();
+                        actualizarResumen();
+                        registrarActividad(`Alumno ${studentName} agregado al grupo ${grupo.nombre}`);
                         mostrarNotificacion("Éxito", "Alumno agregado correctamente.", "success");
                     }
                 }
             });
         }
 
-        // Eliminar un alumno
+        /**
+         * Elimina un alumno de un grupo
+         * @param {string} groupId - ID del grupo
+         * @param {string} studentId - Matrícula del alumno a eliminar
+         */
         function removeStudent(groupId, studentId) {
             Swal.fire({
                 title: '¿Estás seguro?',
@@ -848,16 +1270,25 @@
                     let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
                     let grupo = grupos.find(g => g.id === groupId);
                     if (grupo) {
+                        let alumno = grupo.alumnos.find(a => a.matricula === studentId);
                         grupo.alumnos = grupo.alumnos.filter(alumno => alumno.matricula !== studentId);
                         localStorage.setItem("grupos", JSON.stringify(grupos));
                         cargarGrupos();
+                        actualizarResumen();
+                        if (alumno) {
+                            registrarActividad(`Alumno ${alumno.nombre} eliminado del grupo ${grupo.nombre}`);
+                        }
                         mostrarNotificacion("Éxito", "Alumno eliminado correctamente.", "success");
                     }
                 }
             });
         }
 
-        // Agregar un maestro
+        // ===== FUNCIONES PARA MAESTROS =====
+
+        /**
+         * Agrega un nuevo maestro al sistema
+         */
         function addTeacher() {
             Swal.fire({
                 title: 'Agregar Maestro',
@@ -871,8 +1302,8 @@
                 preConfirm: () => {
                     let teacherName = document.getElementById('teacher-name').value;
                     let teacherSubject = document.getElementById('teacher-subject').value;
-                    if (!teacherName || !teacherSubject) {
-                        Swal.showValidationMessage('Todos los campos son obligatorios.');
+                    if (!teacherName) {
+                        Swal.showValidationMessage('El nombre del maestro es obligatorio.');
                     }
                     return { teacherName, teacherSubject };
                 }
@@ -888,60 +1319,185 @@
                         nombre: teacherName, 
                         email: teacherEmail, 
                         password: teacherPassword,
-                        materia: teacherSubject 
+                        materia: teacherSubject || null
                     };
                     maestros.push(nuevoMaestro);
                     localStorage.setItem("maestros", JSON.stringify(maestros));
-                    cargarMaestros();
+                    actualizarResumen();
+                    registrarActividad(`Maestro ${teacherName} agregado al sistema`);
                     mostrarNotificacion("Éxito", "Maestro agregado correctamente.", "success");
                 }
             });
         }
 
-        // Generar contraseña automáticamente (solo letras y números)
-        function generarContraseña() {
-            const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; // Solo letras y números
-            let contraseña = '';
-            for (let i = 0; i < 10; i++) { // Longitud de 10 caracteres
-                contraseña += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
-            }
-            return contraseña;
+        /**
+         * Elimina un maestro del sistema
+         * @param {string} teacherId - ID del maestro a eliminar
+         */
+        function removeTeacher(teacherId) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#2E7D32',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+                    let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+                    
+                    // Obtener nombre del maestro antes de eliminarlo
+                    let maestro = maestros.find(m => m.id === teacherId);
+                    let nombreMaestro = maestro ? maestro.nombre : "Maestro";
+                    
+                    // Eliminar el maestro
+                    maestros = maestros.filter(m => m.id !== teacherId);
+                    
+                    // Quitar las asignaciones de este maestro a los grupos
+                    grupos.forEach(grupo => {
+                        if (grupo.maestros) {
+                            grupo.maestros = grupo.maestros.filter(id => id !== teacherId);
+                        }
+                    });
+                    
+                    localStorage.setItem("maestros", JSON.stringify(maestros));
+                    localStorage.setItem("grupos", JSON.stringify(grupos));
+                    cargarGrupos();
+                    actualizarResumen();
+                    registrarActividad(`Maestro ${nombreMaestro} eliminado del sistema`);
+                    mostrarNotificacion("Éxito", "Maestro eliminado correctamente.", "success");
+                }
+            });
         }
 
-        // Asignar un maestro a un grupo
-        function assignTeacher(groupId) {
+        /**
+         * Asigna un maestro a un grupo específico
+         * @param {string} groupId - ID del grupo al que se asignará el maestro
+         */
+        function asignarMaestro(groupId) {
             let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+            let materias = JSON.parse(localStorage.getItem("materias")) || [];
+            
             if (maestros.length === 0) {
                 mostrarNotificacion("Error", "No hay maestros disponibles.", "error");
                 return;
             }
 
-            let options = maestros.map(maestro => `<option value="${maestro.id}">${maestro.nombre}</option>`).join('');
+            let options = maestros.map(maestro => {
+                let materiaNombre = maestro.materia || 'Sin materia asignada';
+                return `<option value="${maestro.id}">${maestro.nombre} (${materiaNombre})</option>`;
+            }).join('');
+            
             Swal.fire({
-                title: 'Asignar Maestro',
-                html: `<select id="teacher-select">${options}</select>`,
+                title: 'Asignar Maestro al Grupo',
+                html: `
+                    <select id="teacher-select" class="swal2-select" style="width: 100%; margin-bottom: 10px;">
+                        ${options}
+                    </select>
+                    <select id="subject-select" class="swal2-select" style="width: 100%;">
+                        <option value="">Seleccionar materia (opcional)</option>
+                        ${materias.map(materia => `<option value="${materia.id}">${materia.nombre}</option>`).join('')}
+                    </select>
+                `,
                 showCancelButton: true,
                 confirmButtonText: 'Asignar',
                 cancelButtonText: 'Cancelar',
                 preConfirm: () => {
                     let selectedTeacherId = document.getElementById('teacher-select').value;
-                    return selectedTeacherId;
+                    let selectedSubjectId = document.getElementById('subject-select').value;
+                    return { selectedTeacherId, selectedSubjectId };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
+                    let { selectedTeacherId, selectedSubjectId } = result.value;
                     let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
                     let grupo = grupos.find(g => g.id === groupId);
+                    let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+                    
                     if (grupo) {
-                        grupo.maestro = result.value;
+                        // Verificar si el maestro ya está asignado
+                        if (grupo.maestros && grupo.maestros.includes(selectedTeacherId)) {
+                            mostrarNotificacion("Error", "Este maestro ya está asignado al grupo.", "error");
+                            return;
+                        }
+                        
+                        // Obtener nombre del maestro
+                        let maestro = maestros.find(m => m.id === selectedTeacherId);
+                        let nombreMaestro = maestro ? maestro.nombre : "Maestro";
+                        
+                        // Asignar maestro al grupo
+                        grupo.maestros = grupo.maestros || [];
+                        grupo.maestros.push(selectedTeacherId);
+                        
+                        // Asignar materia si se seleccionó una
+                        if (selectedSubjectId) {
+                            grupo.materias = grupo.materias || [];
+                            if (!grupo.materias.includes(selectedSubjectId)) {
+                                grupo.materias.push(selectedSubjectId);
+                            }
+                            
+                            // Actualizar la materia del maestro
+                            let maestroIndex = maestros.findIndex(m => m.id === selectedTeacherId);
+                            if (maestroIndex !== -1) {
+                                let materia = materias.find(m => m.id === selectedSubjectId);
+                                if (materia) {
+                                    maestros[maestroIndex].materia = materia.nombre;
+                                }
+                            }
+                        }
+                        
                         localStorage.setItem("grupos", JSON.stringify(grupos));
+                        localStorage.setItem("maestros", JSON.stringify(maestros));
                         cargarGrupos();
+                        registrarActividad(`Maestro ${nombreMaestro} asignado al grupo ${grupo.nombre}`);
                         mostrarNotificacion("Éxito", "Maestro asignado correctamente.", "success");
                     }
                 }
             });
         }
 
-        // Agregar una materia
+        /**
+         * Desasigna un maestro de un grupo
+         * @param {string} groupId - ID del grupo
+         * @param {string} teacherId - ID del maestro a desasignar
+         */
+        function desasignarMaestro(groupId, teacherId) {
+            Swal.fire({
+                title: '¿Desasignar maestro?',
+                text: "El maestro dejará de estar asignado a este grupo.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2E7D32',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, desasignar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+                    let grupo = grupos.find(g => g.id === groupId);
+                    let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+                    
+                    if (grupo && grupo.maestros) {
+                        // Obtener nombre del maestro antes de desasignarlo
+                        let maestro = maestros.find(m => m.id === teacherId);
+                        let nombreMaestro = maestro ? maestro.nombre : "Maestro";
+                        
+                        grupo.maestros = grupo.maestros.filter(id => id !== teacherId);
+                        localStorage.setItem("grupos", JSON.stringify(grupos));
+                        cargarGrupos();
+                        registrarActividad(`Maestro ${nombreMaestro} desasignado del grupo ${grupo.nombre}`);
+                        mostrarNotificacion("Éxito", "Maestro desasignado correctamente.", "success");
+                    }
+                }
+            });
+        }
+
+        // ===== FUNCIONES PARA MATERIAS =====
+
+        /**
+         * Agrega una nueva materia al sistema
+         */
         function addSubject() {
             Swal.fire({
                 title: 'Agregar Materia',
@@ -981,70 +1537,17 @@
                     };
                     materias.push(nuevaMateria);
                     localStorage.setItem("materias", JSON.stringify(materias));
-                    cargarMaterias();
+                    actualizarResumen();
+                    registrarActividad(`Materia ${subjectName} agregada a la carrera ${subjectCarrera}`);
                     mostrarNotificacion("Éxito", "Materia agregada correctamente.", "success");
                 }
             });
         }
 
-        // Asignar materia a un grupo
-        function assignSubjectToGroup() {
-            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
-            let materias = JSON.parse(localStorage.getItem("materias")) || [];
-            if (grupos.length === 0 || materias.length === 0) {
-                mostrarNotificacion("Error", "No hay grupos o materias disponibles.", "error");
-                return;
-            }
-
-            let groupOptions = grupos.map(grupo => `<option value="${grupo.id}">${grupo.nombre} (${grupo.carrera})</option>`).join('');
-            Swal.fire({
-                title: 'Asignar Materia a Grupo',
-                html: `
-                    <select id="group-select" onchange="filtrarMateriasPorCarrera()">${groupOptions}</select>
-                    <select id="subject-select"></select>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Asignar',
-                cancelButtonText: 'Cancelar',
-                didOpen: () => {
-                    // Filtrar materias por la carrera del primer grupo seleccionado por defecto
-                    filtrarMateriasPorCarrera();
-                },
-                preConfirm: () => {
-                    let selectedGroupId = document.getElementById('group-select').value;
-                    let selectedSubjectId = document.getElementById('subject-select').value;
-                    return { selectedGroupId, selectedSubjectId };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let { selectedGroupId, selectedSubjectId } = result.value;
-                    let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
-                    let grupo = grupos.find(g => g.id === selectedGroupId);
-                    if (grupo) {
-                        grupo.materias = grupo.materias || [];
-                        grupo.materias.push(selectedSubjectId);
-                        localStorage.setItem("grupos", JSON.stringify(grupos));
-                        cargarGrupos();
-                        mostrarNotificacion("Éxito", "Materia asignada correctamente.", "success");
-                    }
-                }
-            });
-        }
-
-        // Función para filtrar materias por la carrera del grupo seleccionado
-        function filtrarMateriasPorCarrera() {
-            let grupoId = document.getElementById('group-select').value;
-            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
-            let grupo = grupos.find(g => g.id === grupoId);
-            let materias = JSON.parse(localStorage.getItem("materias")) || [];
-
-            // Filtrar materias por la carrera del grupo seleccionado
-            let materiasFiltradas = materias.filter(materia => materia.carrera === grupo.carrera);
-            let subjectOptions = materiasFiltradas.map(materia => `<option value="${materia.id}">${materia.nombre}</option>`).join('');
-            document.getElementById('subject-select').innerHTML = subjectOptions;
-        }
-
-        // Eliminar una materia
+        /**
+         * Elimina una materia del sistema
+         * @param {string} subjectId - ID de la materia a eliminar
+         */
         function removeSubject(subjectId) {
             Swal.fire({
                 title: '¿Estás seguro?',
@@ -1057,15 +1560,145 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     let materias = JSON.parse(localStorage.getItem("materias")) || [];
+                    let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+                    
+                    // Obtener nombre de la materia antes de eliminarla
+                    let materia = materias.find(m => m.id === subjectId);
+                    let nombreMateria = materia ? materia.nombre : "Materia";
+                    let carreraMateria = materia ? materia.carrera : "";
+                    
+                    // Eliminar la materia
                     materias = materias.filter(m => m.id !== subjectId);
+                    
+                    // Quitar la materia de los grupos
+                    grupos.forEach(grupo => {
+                        if (grupo.materias) {
+                            grupo.materias = grupo.materias.filter(id => id !== subjectId);
+                        }
+                    });
+                    
+                    // Quitar la materia de los maestros
+                    let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+                    if (materia) {
+                        maestros.forEach(maestro => {
+                            if (maestro.materia === materia.nombre) {
+                                maestro.materia = null;
+                            }
+                        });
+                    }
+                    
                     localStorage.setItem("materias", JSON.stringify(materias));
-                    cargarMaterias();
+                    localStorage.setItem("grupos", JSON.stringify(grupos));
+                    localStorage.setItem("maestros", JSON.stringify(maestros));
+                    cargarGrupos();
+                    actualizarResumen();
+                    registrarActividad(`Materia ${nombreMateria} eliminada de la carrera ${carreraMateria}`);
                     mostrarNotificacion("Éxito", "Materia eliminada correctamente.", "success");
                 }
             });
         }
 
-        // Búsqueda de alumnos con debounce
+        /**
+         * Asigna una materia a un grupo específico
+         * @param {string} groupId - ID del grupo al que se asignará la materia
+         */
+        function asignarMateria(groupId) {
+            let materias = JSON.parse(localStorage.getItem("materias")) || [];
+            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+            let grupo = grupos.find(g => g.id === groupId);
+            
+            if (!grupo) return;
+            
+            // Filtrar materias que no estén ya asignadas
+            let materiasDisponibles = materias.filter(m => !grupo.materias || !grupo.materias.includes(m.id));
+            
+            if (materiasDisponibles.length === 0) {
+                mostrarNotificacion("Error", "No hay materias disponibles para asignar.", "error");
+                return;
+            }
+            
+            let options = materiasDisponibles.map(materia => 
+                `<option value="${materia.id}">${materia.nombre}</option>`
+            ).join('');
+            
+            Swal.fire({
+                title: 'Asignar Materia al Grupo',
+                html: `<select id="subject-select">${options}</select>`,
+                showCancelButton: true,
+                confirmButtonText: 'Asignar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    return document.getElementById('subject-select').value;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let selectedSubjectId = result.value;
+                    let materia = materias.find(m => m.id === selectedSubjectId);
+                    let nombreMateria = materia ? materia.nombre : "Materia";
+                    
+                    grupo.materias = grupo.materias || [];
+                    grupo.materias.push(selectedSubjectId);
+                    localStorage.setItem("grupos", JSON.stringify(grupos));
+                    cargarGrupos();
+                    registrarActividad(`Materia ${nombreMateria} asignada al grupo ${grupo.nombre}`);
+                    mostrarNotificacion("Éxito", "Materia asignada correctamente.", "success");
+                }
+            });
+        }
+
+        /**
+         * Desasigna una materia de un grupo
+         * @param {string} groupId - ID del grupo
+         * @param {string} subjectId - ID de la materia a desasignar
+         */
+        function desasignarMateria(groupId, subjectId) {
+            Swal.fire({
+                title: '¿Desasignar materia?',
+                text: "Esta materia dejará de estar asignada al grupo.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2E7D32',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, desasignar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+                    let grupo = grupos.find(g => g.id === groupId);
+                    let materias = JSON.parse(localStorage.getItem("materias")) || [];
+                    
+                    if (grupo && grupo.materias) {
+                        // Obtener nombre de la materia antes de desasignarla
+                        let materia = materias.find(m => m.id === subjectId);
+                        let nombreMateria = materia ? materia.nombre : "Materia";
+                        
+                        // Desasignar la materia
+                        grupo.materias = grupo.materias.filter(id => id !== subjectId);
+                        
+                        // Desasignar maestros que solo enseñaban esta materia
+                        if (grupo.maestros) {
+                            let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+                            if (materia) {
+                                grupo.maestros = grupo.maestros.filter(maestroId => {
+                                    let maestro = maestros.find(m => m.id === maestroId);
+                                    return !maestro || maestro.materia !== materia.nombre;
+                                });
+                            }
+                        }
+                        
+                        localStorage.setItem("grupos", JSON.stringify(grupos));
+                        cargarGrupos();
+                        registrarActividad(`Materia ${nombreMateria} desasignada del grupo ${grupo.nombre}`);
+                        mostrarNotificacion("Éxito", "Materia desasignada correctamente.", "success");
+                    }
+                }
+            });
+        }
+
+        // ===== FUNCIONES DE BÚSQUEDA =====
+
+        /**
+         * Busca alumnos por nombre o matrícula (con debounce)
+         */
         let timeout;
         function buscarAlumno() {
             clearTimeout(timeout);
@@ -1081,10 +1714,13 @@
                     });
                 });
                 mostrarResultados(resultados);
-            }, 300); // Debounce de 300ms
+            }, 300);
         }
 
-        // Mostrar resultados de búsqueda
+        /**
+         * Muestra los resultados de búsqueda
+         * @param {Array} resultados - Lista de alumnos que coinciden con la búsqueda
+         */
         function mostrarResultados(resultados) {
             let groupContainer = document.getElementById("group-list");
             groupContainer.innerHTML = "";
@@ -1099,51 +1735,69 @@
                 groupElement.classList.add("group-container");
                 groupElement.innerHTML = 
                     `<h3>Grupo: ${resultado.grupo}</h3>
-                    <table class="groups-table">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Matrícula</th>
-                                <th>Correo</th>
-                                <th>Contraseña</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>${resultado.alumno.nombre}</td>
-                                <td>${resultado.alumno.matricula}</td>
-                                <td>${resultado.alumno.email}</td>
-                                <td>${resultado.alumno.password}</td>
-                                <td>
-                                    <button onclick="removeStudent('${resultado.grupo}', '${resultado.alumno.matricula}')">Quitar</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>`;
+                    <div class="table-container">
+                        <table class="groups-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Matrícula</th>
+                                    <th>Correo</th>
+                                    <th>Contraseña</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${resultado.alumno.nombre}</td>
+                                    <td>${resultado.alumno.matricula}</td>
+                                    <td>${resultado.alumno.email}</td>
+                                    <td>${resultado.alumno.password}</td>
+                                    <td>
+                                        <button onclick="removeStudent('${resultado.grupo}', '${resultado.alumno.matricula}')">Quitar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>`;
                 groupContainer.appendChild(groupElement);
             });
         }
 
-        // Exportar datos a Excel
+        // ===== FUNCIONES DE IMPORTACIÓN/EXPORTACIÓN =====
+
+        /**
+         * Exporta los datos a un archivo Excel
+         */
         function exportarDatos() {
             let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
             let maestros = JSON.parse(localStorage.getItem("maestros")) || [];
+            let materias = JSON.parse(localStorage.getItem("materias")) || [];
 
             // Crear un libro de trabajo y una hoja
             let workbook = XLSX.utils.book_new();
             let worksheetData = [];
 
             // Encabezados
-            worksheetData.push(["Grupo", "Nombre", "Matrícula", "Correo", "Contraseña", "Maestro"]);
+            worksheetData.push(["Grupo", "Nombre", "Matrícula", "Correo", "Contraseña", "Maestro", "Materias"]);
 
             // Datos
             grupos.forEach(grupo => {
-                let maestroNombre = "No asignado";
-                if (grupo.maestro) {
-                    let maestro = maestros.find(m => m.id === grupo.maestro);
-                    if (maestro) maestroNombre = maestro.nombre;
+                let maestroNombres = "No asignado";
+                if (grupo.maestros && grupo.maestros.length > 0) {
+                    maestroNombres = grupo.maestros.map(maestroId => {
+                        let maestro = maestros.find(m => m.id === maestroId);
+                        return maestro ? maestro.nombre : '';
+                    }).filter(Boolean).join(', ');
                 }
+                
+                let materiaNombres = "No asignadas";
+                if (grupo.materias && grupo.materias.length > 0) {
+                    materiaNombres = grupo.materias.map(materiaId => {
+                        let materia = materias.find(m => m.id === materiaId);
+                        return materia ? materia.nombre : '';
+                    }).filter(Boolean).join(', ');
+                }
+                
                 grupo.alumnos.forEach(alumno => {
                     worksheetData.push([
                         grupo.nombre,
@@ -1151,7 +1805,8 @@
                         alumno.matricula,
                         alumno.email,
                         alumno.password,
-                        maestroNombre
+                        maestroNombres,
+                        materiaNombres
                     ]);
                 });
             });
@@ -1162,23 +1817,123 @@
 
             // Generar el archivo Excel
             XLSX.writeFile(workbook, "alumnos.xlsx");
+            registrarActividad("Datos exportados a Excel");
         }
 
-        // Cambiar modo oscuro
-        function toggleDarkMode() {
-            const body = document.body;
-            const darkModeToggle = document.querySelector('.dark-mode-toggle');
-            body.classList.toggle('dark-mode');
-            const isDarkMode = body.classList.contains('dark-mode');
-            localStorage.setItem('dark-mode', isDarkMode);
+        /**
+         * Importa datos desde un archivo Excel
+         * @param {Event} event - Evento del input file
+         */
+        function importarExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-            // Cambiar el ícono del botón según el modo actual
-            if (isDarkMode) {
-                darkModeToggle.textContent = '🌞';
-            } else {
-                darkModeToggle.textContent = '🌙';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                // Procesar la primera hoja
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                
+                if (jsonData.length === 0) {
+                    mostrarNotificacion("Error", "El archivo está vacío.", "error");
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Confirmar Importación',
+                    html: `Se importarán ${jsonData.length} registros. ¿Deseas continuar?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Importar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        procesarDatosExcel(jsonData);
+                    }
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        /**
+         * Procesa los datos importados desde Excel
+         * @param {Array} data - Datos importados
+         */
+        function procesarDatosExcel(data) {
+            let grupos = JSON.parse(localStorage.getItem("grupos")) || [];
+            let nuevosGrupos = {};
+            let alumnosImportados = 0;
+            
+            try {
+                data.forEach(row => {
+                    const nombreGrupo = row['Grupo'];
+                    if (!nombreGrupo) return;
+                    
+                    // Crear grupo si no existe
+                    if (!nuevosGrupos[nombreGrupo] && !grupos.some(g => g.nombre === nombreGrupo)) {
+                        nuevosGrupos[nombreGrupo] = {
+                            id: `grupo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                            nombre: nombreGrupo,
+                            carrera: "Importada",
+                            grado: "1",
+                            grupo: "A",
+                            alumnos: [],
+                            maestros: [],
+                            materias: []
+                        };
+                    }
+                    
+                    // Agregar alumno al grupo correspondiente
+                    const grupo = grupos.find(g => g.nombre === nombreGrupo) || nuevosGrupos[nombreGrupo];
+                    if (grupo && row['Nombre'] && row['Matrícula']) {
+                        grupo.alumnos.push({
+                            nombre: row['Nombre'],
+                            matricula: row['Matrícula'],
+                            email: row['Correo'] || `al${row['Matrícula']}@cbt.com`,
+                            password: row['Contraseña'] || generarContraseña()
+                        });
+                        alumnosImportados++;
+                    }
+                });
+                
+                // Agregar los nuevos grupos a la lista existente
+                Object.values(nuevosGrupos).forEach(nuevoGrupo => {
+                    grupos.push(nuevoGrupo);
+                });
+                
+                localStorage.setItem("grupos", JSON.stringify(grupos));
+                cargarGrupos();
+                actualizarResumen();
+                registrarActividad(`Importados ${alumnosImportados} alumnos desde Excel`);
+                mostrarNotificacion("Éxito", `Datos importados correctamente. ${alumnosImportados} alumnos agregados.`, "success");
+            } catch (error) {
+                console.error("Error al procesar el archivo:", error);
+                mostrarNotificacion("Error", "Hubo un problema al procesar el archivo.", "error");
             }
+            
+            // Limpiar el input de archivo
+            document.getElementById('excel-import').value = '';
         }
+
+        // ===== FUNCIONES UTILITARIAS =====
+
+        /**
+         * Genera una contraseña aleatoria (solo letras y números)
+         * @returns {string} Contraseña generada
+         */
+        function generarContraseña() {
+            const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let contraseña = '';
+            for (let i = 0; i < 10; i++) {
+                contraseña += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+            }
+            return contraseña;
+        }
+
+        // ===== INICIALIZACIÓN =====
 
         // Verificar el modo oscuro al cargar la página
         window.onload = function() {
@@ -1195,12 +1950,6 @@
 
             cargarAdminDatos();
         };
-
-        // Función para mostrar/ocultar el menú hamburguesa
-        function toggleMenu() {
-            const headerButtons = document.getElementById('header-buttons');
-            headerButtons.classList.toggle('active');
-        }
     </script>
 </body>
 </html>

@@ -10,6 +10,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
     <!-- Incluir FontAwesome para íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Incluir Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Incluir JSZip para exportación múltiple -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         /* Estilos Globales */
         body {
@@ -20,9 +25,9 @@
             color: #333;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Cambiado a flex-start para permitir desplazamiento */
+            align-items: flex-start;
             min-height: 100vh;
-            padding: 20px; /* Espaciado para que el contenido no toque los bordes */
+            padding: 20px;
         }
 
         .maestros-container {
@@ -31,92 +36,55 @@
             border-radius: 20px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 1000px;
+            max-width: 1200px;
             text-align: center;
             animation: fadeIn 1s ease-in-out;
             position: relative;
-            overflow-y: auto; /* Habilitar desplazamiento vertical */
-            max-height: 90vh; /* Limitar la altura para que no ocupe toda la pantalla */
+            overflow-y: auto;
+            max-height: 90vh;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .maestros-container h2 {
-            font-size: 2rem;
-            margin-bottom: 25px;
-            color: #2E7D32;
-            font-weight: bold;
-        }
-
-        .grupo {
-            margin-bottom: 30px;
-            text-align: left;
-            background-color: #f9f9f9;
-            padding: 20px;
+        /* Resumen docente */
+        .resumen-docente {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e8f5e9;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            animation: slideIn 0.5s ease-out;
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .resumen-item {
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
         }
 
-        .grupo h3 {
-            font-size: 1.5rem;
+        .resumen-item i {
+            margin-right: 10px;
             color: #2E7D32;
-            margin-bottom: 15px;
+            font-size: 1.5rem;
         }
 
-        .grupo table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
+        /* Barra de herramientas */
+        .herramientas-docente {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 15px;
         }
 
-        .grupo th,
-        .grupo td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-
-        .grupo th {
-            background-color: #2E7D32;
-            color: white;
-            font-weight: bold;
-        }
-
-        .grupo tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        .grupo tr.selected {
-            background-color: #e0f7fa !important;
-        }
-
-        .grupo input[type="number"] {
-            width: 80px;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-size: 1rem;
+        .herramientas-grupo, .filtros-grupo {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
         }
 
         .btn {
@@ -141,6 +109,22 @@
             transform: translateY(0);
         }
 
+        .btn-herramienta {
+            background-color: #5c6bc0;
+        }
+
+        .btn-herramienta:hover {
+            background-color: #3949ab;
+        }
+
+        .btn-accion {
+            background-color: #7e57c2;
+        }
+
+        .btn-accion:hover {
+            background-color: #5e35b1;
+        }
+
         .logout-btn {
             position: absolute;
             top: 20px;
@@ -152,46 +136,175 @@
             background-color: #b71c1c;
         }
 
-        /* Estilos para calificaciones */
-        .reprobatoria {
-            color: red;
+        /* Busqueda y filtros */
+        .busqueda-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .busqueda-container i {
+            position: absolute;
+            left: 10px;
+            color: #666;
+        }
+
+        #buscar-alumno {
+            padding: 8px 15px 8px 35px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            width: 200px;
+        }
+
+        select {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: white;
+        }
+
+        /* Grupos y tablas */
+        .grupo {
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .grupo-header {
+            background-color: #2E7D32;
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .grupo-header h3 {
+            margin: 0;
+            color: white;
+            flex-grow: 1;
+        }
+
+        .grupo-toggle {
+            margin-left: 15px;
+            transition: transform 0.3s;
+        }
+
+        .grupo-stats {
+            margin-left: auto;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .grupo-content {
+            background-color: white;
+            padding: 20px;
+            display: none;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .grupo table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .grupo th {
+            position: sticky;
+            top: 0;
+            background-color: #2E7D32;
+            color: white;
             font-weight: bold;
+            padding: 12px 8px;
+        }
+
+        .grupo td {
+            padding: 10px 8px;
+            border: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+
+        .grupo tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+        .grupo tr:hover {
+            background-color: #e8f5e9;
+        }
+
+        .grupo tr.selected {
+            background-color: #bbdefb !important;
+            border-left: 3px solid #1976d2;
+        }
+
+        /* Inputs de calificación */
+        input[type="number"].calif {
+            width: 60px;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            border: 2px solid #ddd;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"].calif:focus {
+            border-color: #2E7D32;
+            outline: none;
+        }
+
+        /* Comentarios */
+        textarea.comentario {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Calificaciones finales */
+        .reprobatoria {
+            color: #d32f2f;
+            font-weight: bold;
+            background-color: #ffebee;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
         }
 
         .aprobatoria {
-            color: green;
+            color: #388e3c;
             font-weight: bold;
+            background-color: #e8f5e9;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
         }
 
-        /* Animación de fondo */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 10%, transparent 10.01%);
-            background-size: 20px 20px;
-            animation: moveBackground 10s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes moveBackground {
-            from {
-                transform: translateY(0);
-            }
-            to {
-                transform: translateY(-20px);
-            }
-        }
-
-        /* Estilos para la materia */
-        .materia-info {
-            font-size: 1.2rem;
-            color: #2E7D32;
+        /* Acciones rápidas */
+        .acciones-rapidas {
+            display: flex;
+            justify-content: flex-end;
             margin-bottom: 20px;
-            font-weight: bold;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Sin grupos */
+        .sin-grupos {
+            text-align: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            color: #666;
         }
 
         /* Notificaciones */
@@ -225,6 +338,10 @@
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .cargando-spinner {
@@ -234,11 +351,31 @@
             width: 30px;
             height: 30px;
             animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* Animación de fondo */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 10%, transparent 10.01%);
+            background-size: 20px 20px;
+            animation: moveBackground 10s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes moveBackground {
+            from { transform: translateY(0); }
+            to { transform: translateY(-20px); }
         }
     </style>
 </head>
@@ -247,28 +384,71 @@
     <div class="maestros-container">
         <!-- Botón de Cerrar Sesión -->
         <button class="btn logout-btn" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+        
         <h2 id="nombre-maestro">Panel de Maestros</h2>
-        <!-- Información de la materia -->
-        <div id="materia-info" class="materia-info"></div>
-
-        <!-- Campo para importar archivos -->
-        <div style="margin-bottom: 20px;">
-            <input type="file" id="file-input" accept=".xlsx, .xls, .csv" multiple style="display: none;">
-            <button class="btn" onclick="document.getElementById('file-input').click()"><i class="fas fa-file-import"></i> Importar Calificaciones</button>
-            <button class="btn" onclick="procesarArchivos()"><i class="fas fa-cogs"></i> Procesar Archivos</button>
+        
+        <!-- Resumen docente -->
+        <div class="resumen-docente">
+            <div class="resumen-item">
+                <i class="fas fa-users"></i>
+                <span id="total-grupos">0 grupos</span>
+            </div>
+            <div class="resumen-item">
+                <i class="fas fa-user-graduate"></i>
+                <span id="total-alumnos">0 alumnos</span>
+            </div>
+            <div class="resumen-item">
+                <i class="fas fa-chart-line"></i>
+                <span id="promedio-general">0.00</span>
+            </div>
         </div>
 
-        <!-- Filtros -->
-        <input type="text" id="buscar-alumno" placeholder="Buscar por nombre, matrícula o calificación" oninput="filtrarAlumnos()">
-        <select id="filtro-estado" onchange="filtrarAlumnos()">
-            <option value="todos">Todos</option>
-            <option value="aprobados">Aprobados</option>
-            <option value="reprobados">Reprobados</option>
-        </select>
-        <select id="filtro-grupo" onchange="filtrarAlumnos()">
-            <option value="todos">Todos los Grupos</option>
-            <!-- Opciones de grupos dinámicas -->
-        </select>
+        <!-- Barra de herramientas -->
+        <div class="herramientas-docente">
+            <div class="herramientas-grupo">
+                <input type="file" id="file-input" accept=".xlsx, .xls, .csv" multiple style="display: none;">
+                <button class="btn btn-herramienta" onclick="document.getElementById('file-input').click()">
+                    <i class="fas fa-file-import"></i> Importar
+                </button>
+                <button class="btn btn-herramienta" onclick="procesarArchivos()">
+                    <i class="fas fa-cogs"></i> Procesar
+                </button>
+                <button class="btn btn-herramienta" onclick="exportarTodo()">
+                    <i class="fas fa-file-export"></i> Exportar Todo
+                </button>
+                <button class="btn btn-herramienta" onclick="mostrarBusquedaAvanzada()">
+                    <i class="fas fa-search-plus"></i> Búsqueda Avanzada
+                </button>
+            </div>
+            
+            <div class="filtros-grupo">
+                <div class="busqueda-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscar-alumno" placeholder="Buscar alumno..." oninput="filtrarAlumnos()">
+                </div>
+                <select id="filtro-estado" onchange="filtrarAlumnos()">
+                    <option value="todos">Todos</option>
+                    <option value="aprobados">Aprobados</option>
+                    <option value="reprobados">Reprobados</option>
+                </select>
+                <select id="filtro-grupo" onchange="filtrarAlumnos()">
+                    <option value="todos">Todos los Grupos</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="acciones-rapidas">
+            <button class="btn btn-accion" onclick="aplicarCalificacionGlobal()">
+                <i class="fas fa-magic"></i> Aplicar Calificación
+            </button>
+            <button class="btn btn-accion" onclick="enviarComunicado()">
+                <i class="fas fa-envelope"></i> Enviar Comunicado
+            </button>
+            <button class="btn btn-accion" onclick="guardarTodo()">
+                <i class="fas fa-save"></i> Guardar Todo
+            </button>
+        </div>
 
         <!-- Indicador de carga -->
         <div id="cargando">
@@ -310,8 +490,83 @@
 
             if (maestro) {
                 document.getElementById('nombre-maestro').textContent = `Bienvenido, ${maestro.nombre}`;
-                document.getElementById('materia-info').textContent = `Materia: ${maestro.materia || 'No asignada'}`;
             }
+        }
+
+        // Función para cerrar sesión - MEJORADA
+        function cerrarSesion() {
+            if (cambiosNoGuardados) {
+                Swal.fire({
+                    title: 'Cambios no guardados',
+                    text: 'Tienes cambios sin guardar. ¿Estás seguro de que deseas cerrar sesión?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cerrar sesión',
+                    cancelButtonText: 'Cancelar',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Limpiar parámetros de la URL antes de redirigir
+                        window.location.href = 'index.html';
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: '¿Cerrar sesión?',
+                    text: '¿Estás seguro de que deseas cerrar sesión?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cerrar sesión',
+                    cancelButtonText: 'Cancelar',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Limpiar parámetros de la URL antes de redirigir
+                        window.location.href = 'index.html';
+                    }
+                });
+            }
+        }
+
+        // Función para actualizar el resumen docente
+        function actualizarResumenDocente() {
+            let urlParams = new URLSearchParams(window.location.search);
+            let maestroId = urlParams.get('maestro');
+            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
+            let gruposMaestro = grupos.filter(g => g.maestro === maestroId);
+            
+            let totalAlumnos = 0;
+            let sumaCalificaciones = 0;
+            let contadorCalificaciones = 0;
+            
+            gruposMaestro.forEach(grupo => {
+                totalAlumnos += grupo.alumnos.length;
+                grupo.alumnos.forEach(alumno => {
+                    if (alumno.calificacionFinal) {
+                        sumaCalificaciones += parseFloat(alumno.calificacionFinal);
+                        contadorCalificaciones++;
+                    }
+                });
+            });
+            
+            document.getElementById('total-grupos').textContent = `${gruposMaestro.length} ${gruposMaestro.length === 1 ? 'grupo' : 'grupos'}`;
+            document.getElementById('total-alumnos').textContent = `${totalAlumnos} ${totalAlumnos === 1 ? 'alumno' : 'alumnos'}`;
+            
+            const promedioGeneral = contadorCalificaciones > 0 ? (sumaCalificaciones / contadorCalificaciones).toFixed(2) : 0;
+            document.getElementById('promedio-general').textContent = promedioGeneral;
+        }
+
+        // Función para calcular el promedio de un grupo
+        function calcularPromedioGrupo(grupo) {
+            let suma = 0;
+            let contador = 0;
+            
+            grupo.alumnos.forEach(alumno => {
+                if (alumno.calificacionFinal) {
+                    suma += parseFloat(alumno.calificacionFinal);
+                    contador++;
+                }
+            });
+            
+            return contador > 0 ? suma / contador : 0;
         }
 
         // Función para cargar los grupos asignados al maestro
@@ -325,58 +580,92 @@
             container.innerHTML = "";
 
             if (gruposMaestro.length === 0) {
-                container.innerHTML = "<p>No tienes grupos asignados.</p>";
+                container.innerHTML = "<p class='sin-grupos'>No tienes grupos asignados actualmente.</p>";
                 return;
             }
 
+            // Actualizar opciones del filtro de grupos
+            const filtroGrupo = document.getElementById('filtro-grupo');
+            filtroGrupo.innerHTML = '<option value="todos">Todos los Grupos</option>';
+            
             gruposMaestro.forEach(grupo => {
+                const option = document.createElement('option');
+                option.value = grupo.nombre;
+                option.textContent = grupo.nombre;
+                filtroGrupo.appendChild(option);
+            });
+
+            gruposMaestro.forEach((grupo, index) => {
                 let grupoElement = document.createElement('div');
                 grupoElement.classList.add('grupo');
                 grupoElement.innerHTML = `
-                    <h3>Grupo: ${grupo.nombre}</h3>
-                    <button class="btn" onclick="ordenarAlumnos('${grupo.id}', 'calificacion')"><i class="fas fa-sort-amount-down"></i> Ordenar por Calificación</button>
-                    <button class="btn" onclick="ordenarAlumnos('${grupo.id}', 'nombre')"><i class="fas fa-sort-alpha-down"></i> Ordenar por Nombre</button>
-                    <button class="btn" onclick="mostrarEstadisticas('${grupo.id}')"><i class="fas fa-chart-bar"></i> Ver Estadísticas</button>
-                    <button class="btn" onclick="exportarCSV('${grupo.id}')"><i class="fas fa-file-export"></i> Exportar a CSV</button>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Matrícula</th>
-                                <th>Calif1</th>
-                                <th>Calif2</th>
-                                <th>Calif3</th>
-                                <th>Calificación Final</th>
-                                <th>Comentarios</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${grupo.alumnos.map(alumno => `
-                                <tr>
-                                    <td>${alumno.nombre}</td>
-                                    <td>${alumno.matricula}</td>
-                                    <td>
-                                        <input type="number" class="calif" id="calif1-${alumno.matricula}" value="${alumno.calif1 || ''}" min="5" max="10" oninput="validarCalificacion(this); calcularCalificacionFinal('${alumno.matricula}'); marcarCambios()">
-                                    </td>
-                                    <td>
-                                        <input type="number" class="calif" id="calif2-${alumno.matricula}" value="${alumno.calif2 || ''}" min="5" max="10" oninput="validarCalificacion(this); calcularCalificacionFinal('${alumno.matricula}'); marcarCambios()">
-                                    </td>
-                                    <td>
-                                        <input type="number" class="calif" id="calif3-${alumno.matricula}" value="${alumno.calif3 || ''}" min="5" max="10" oninput="validarCalificacion(this); calcularCalificacionFinal('${alumno.matricula}'); marcarCambios()">
-                                    </td>
-                                    <td>
-                                        <span id="calificacion-final-${alumno.matricula}" class="calificacion-final">${alumno.calificacionFinal || '0.00'}</span>
-                                    </td>
-                                    <td>
-                                        <textarea class="comentario" id="comentario-${alumno.matricula}">${alumno.comentario || ''}</textarea>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <button class="btn" onclick="guardarCalificaciones('${grupo.id}')"><i class="fas fa-save"></i> Guardar Calificaciones</button>
-                    <button class="btn" onclick="guardarComentarios('${grupo.id}')"><i class="fas fa-comment"></i> Guardar Comentarios</button>`;
+                    <div class="grupo-header" onclick="toggleGrupo(${index})">
+                        <h3>Grupo: ${grupo.nombre}</h3>
+                        <span class="grupo-toggle"><i class="fas fa-chevron-down"></i></span>
+                        <span class="grupo-stats">${grupo.alumnos.length} alumnos | Promedio: ${calcularPromedioGrupo(grupo).toFixed(2)}</span>
+                    </div>
+                    <div class="grupo-content" id="grupo-content-${index}">
+                        <div class="grupo-acciones">
+                            <button class="btn" onclick="ordenarAlumnos('${grupo.id}', 'calificacion')"><i class="fas fa-sort-amount-down"></i> Ordenar por Calificación</button>
+                            <button class="btn" onclick="ordenarAlumnos('${grupo.id}', 'nombre')"><i class="fas fa-sort-alpha-down"></i> Ordenar por Nombre</button>
+                            <button class="btn" onclick="mostrarEstadisticas('${grupo.id}')"><i class="fas fa-chart-bar"></i> Ver Estadísticas</button>
+                            <button class="btn" onclick="exportarCSV('${grupo.id}')"><i class="fas fa-file-export"></i> Exportar a CSV</button>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Matrícula</th>
+                                        <th>Calif1</th>
+                                        <th>Calif2</th>
+                                        <th>Calif3</th>
+                                        <th>Calificación Final</th>
+                                        <th>Comentarios</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${grupo.alumnos.map(alumno => `
+                                        <tr>
+                                            <td>${alumno.nombre}</td>
+                                            <td>${alumno.matricula}</td>
+                                            <td>
+                                                <input type="number" class="calif" id="calif1-${alumno.matricula}" value="${alumno.calif1 || ''}" min="5" max="10" oninput="validarCalificacion(this); calcularCalificacionFinal('${alumno.matricula}'); marcarCambios()">
+                                            </td>
+                                            <td>
+                                                <input type="number" class="calif" id="calif2-${alumno.matricula}" value="${alumno.calif2 || ''}" min="5" max="10" oninput="validarCalificacion(this); calcularCalificacionFinal('${alumno.matricula}'); marcarCambios()">
+                                            </td>
+                                            <td>
+                                                <input type="number" class="calif" id="calif3-${alumno.matricula}" value="${alumno.calif3 || ''}" min="5" max="10" oninput="validarCalificacion(this); calcularCalificacionFinal('${alumno.matricula}'); marcarCambios()">
+                                            </td>
+                                            <td>
+                                                <span id="calificacion-final-${alumno.matricula}" class="calificacion-final">${alumno.calificacionFinal || '0.00'}</span>
+                                            </td>
+                                            <td>
+                                                <textarea class="comentario" id="comentario-${alumno.matricula}">${alumno.comentario || ''}</textarea>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="grupo-footer">
+                            <button class="btn" onclick="guardarCalificaciones('${grupo.id}')"><i class="fas fa-save"></i> Guardar Calificaciones</button>
+                            <button class="btn" onclick="guardarComentarios('${grupo.id}')"><i class="fas fa-comment"></i> Guardar Comentarios</button>
+                        </div>
+                    </div>
+                `;
                 container.appendChild(grupoElement);
+                
+                // Agregar eventos de clic a las filas para selección
+                const filas = grupoElement.querySelectorAll('tbody tr');
+                filas.forEach(fila => {
+                    fila.addEventListener('click', function(e) {
+                        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                            this.classList.toggle('selected');
+                        }
+                    });
+                });
             });
 
             // Aplicar estilos iniciales a las calificaciones finales
@@ -385,6 +674,25 @@
                     calcularCalificacionFinal(alumno.matricula);
                 });
             });
+            
+            // Actualizar el resumen del docente
+            actualizarResumenDocente();
+        }
+
+        // Función para mostrar/ocultar grupos
+        function toggleGrupo(index) {
+            const content = document.getElementById(`grupo-content-${index}`);
+            const toggle = document.querySelector(`#grupos-asignados .grupo:nth-child(${index+1}) .grupo-toggle i`);
+            
+            if (content.style.display === 'none' || !content.style.display) {
+                content.style.display = 'block';
+                toggle.classList.remove('fa-chevron-down');
+                toggle.classList.add('fa-chevron-up');
+            } else {
+                content.style.display = 'none';
+                toggle.classList.remove('fa-chevron-up');
+                toggle.classList.add('fa-chevron-down');
+            }
         }
 
         // Función para calcular la calificación final
@@ -409,13 +717,57 @@
         // Función para validar calificaciones
         function validarCalificacion(input) {
             let valor = parseFloat(input.value);
-            if (isNaN(valor) || valor < 5 || valor > 10) {
+            if (isNaN(valor)) {
+                input.style.borderColor = 'red';
+                mostrarNotificacion('La calificación debe ser un número.', 'error');
+                input.value = '';
+            } else if (valor < 5 || valor > 10) {
                 input.style.borderColor = 'red';
                 mostrarNotificacion('La calificación debe estar entre 5 y 10.', 'error');
                 input.value = '';
             } else {
                 input.style.borderColor = '#ddd';
             }
+        }
+
+        // Función para marcar cambios no guardados
+        function marcarCambios() {
+            cambiosNoGuardados = true;
+            
+            // Resetear el timeout si ya existe
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            
+            // Mostrar notificación después de 2 segundos de inactividad
+            timeoutId = setTimeout(() => {
+                if (cambiosNoGuardados) {
+                    mostrarNotificacion('Tienes cambios sin guardar. No olvides guardar tus cambios.', 'info');
+                }
+            }, 2000);
+        }
+
+        // Función para guardar todo
+        function guardarTodo() {
+            let urlParams = new URLSearchParams(window.location.search);
+            let maestroId = urlParams.get('maestro');
+            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
+            let gruposMaestro = grupos.filter(g => g.maestro === maestroId);
+            
+            gruposMaestro.forEach(grupo => {
+                grupo.alumnos.forEach(alumno => {
+                    alumno.calif1 = parseFloat(document.getElementById(`calif1-${alumno.matricula}`).value) || 0;
+                    alumno.calif2 = parseFloat(document.getElementById(`calif2-${alumno.matricula}`).value) || 0;
+                    alumno.calif3 = parseFloat(document.getElementById(`calif3-${alumno.matricula}`).value) || 0;
+                    alumno.calificacionFinal = parseFloat(document.getElementById(`calificacion-final-${alumno.matricula}`).textContent) || 0;
+                    alumno.comentario = document.getElementById(`comentario-${alumno.matricula}`).value;
+                });
+            });
+            
+            localStorage.setItem('grupos', JSON.stringify(grupos));
+            cambiosNoGuardados = false;
+            actualizarResumenDocente();
+            mostrarNotificacion('Todos los cambios guardados correctamente.', 'success');
         }
 
         // Función para guardar las calificaciones
@@ -432,6 +784,7 @@
 
             localStorage.setItem('grupos', JSON.stringify(grupos));
             cambiosNoGuardados = false;
+            actualizarResumenDocente();
             mostrarNotificacion('Calificaciones guardadas correctamente.', 'success');
         }
 
@@ -445,6 +798,7 @@
             });
 
             localStorage.setItem('grupos', JSON.stringify(grupos));
+            cambiosNoGuardados = false;
             mostrarNotificacion('Comentarios guardados correctamente.', 'success');
         }
 
@@ -466,14 +820,48 @@
             link.click();
         }
 
+        // Función para exportar todos los grupos
+        function exportarTodo() {
+            let urlParams = new URLSearchParams(window.location.search);
+            let maestroId = urlParams.get('maestro');
+            let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
+            let gruposMaestro = grupos.filter(g => g.maestro === maestroId);
+            
+            if (gruposMaestro.length === 0) {
+                mostrarNotificacion('No tienes grupos asignados para exportar.', 'error');
+                return;
+            }
+            
+            let zip = new JSZip();
+            let promises = [];
+            
+            gruposMaestro.forEach(grupo => {
+                let csvContent = "Nombre,Matrícula,Calif1,Calif2,Calif3,Calificación Final,Comentarios\n";
+                
+                grupo.alumnos.forEach(alumno => {
+                    csvContent += `${alumno.nombre},${alumno.matricula},${alumno.calif1 || 0},${alumno.calif2 || 0},${alumno.calif3 || 0},${alumno.calificacionFinal || 0},"${alumno.comentario || ''}"\n`;
+                });
+                
+                zip.file(`calificaciones_${grupo.nombre}.csv`, csvContent);
+            });
+            
+            zip.generateAsync({type:"blob"}).then(function(content) {
+                saveAs(content, "calificaciones_todos_los_grupos.zip");
+                mostrarNotificacion('Todos los grupos exportados correctamente.', 'success');
+            });
+        }
+
         // Función para mostrar estadísticas
         function mostrarEstadisticas(grupoId) {
             let grupos = JSON.parse(localStorage.getItem('grupos')) || [];
             let grupo = grupos.find(g => g.id === grupoId);
+            
             let aprobados = 0;
             let reprobados = 0;
             let sumaCalificaciones = 0;
-
+            let calificacionesParciales = [0, 0, 0]; // Sumas de calif1, calif2, calif3
+            let contadoresParciales = [0, 0, 0];
+            
             grupo.alumnos.forEach(alumno => {
                 sumaCalificaciones += alumno.calificacionFinal || 0;
                 if (alumno.calificacionFinal >= 6) {
@@ -481,19 +869,105 @@
                 } else {
                     reprobados++;
                 }
+                
+                // Estadísticas por parcial
+                if (alumno.calif1) {
+                    calificacionesParciales[0] += alumno.calif1;
+                    contadoresParciales[0]++;
+                }
+                if (alumno.calif2) {
+                    calificacionesParciales[1] += alumno.calif2;
+                    contadoresParciales[1]++;
+                }
+                if (alumno.calif3) {
+                    calificacionesParciales[2] += alumno.calif3;
+                    contadoresParciales[2]++;
+                }
             });
-
+            
             let promedioGrupo = (sumaCalificaciones / grupo.alumnos.length).toFixed(2);
-
+            let promediosParciales = calificacionesParciales.map((sum, i) => 
+                contadoresParciales[i] > 0 ? (sum / contadoresParciales[i]).toFixed(2) : 0
+            );
+            
+            // Crear HTML para el gráfico
+            let chartHtml = `
+                <div style="display: flex; justify-content: space-between; margin: 20px 0;">
+                    <div style="width: 48%;">
+                        <h4>Distribución de Aprobados/Reprobados</h4>
+                        <canvas id="chartAprobados" width="200" height="200"></canvas>
+                    </div>
+                    <div style="width: 48%;">
+                        <h4>Evolución de Calificaciones</h4>
+                        <canvas id="chartEvolucion" width="200" height="200"></canvas>
+                    </div>
+                </div>
+            `;
+            
             Swal.fire({
-                title: 'Estadísticas del Grupo',
+                title: `Estadísticas del Grupo ${grupo.nombre}`,
                 html: `
-                    <p>Promedio del Grupo: ${promedioGrupo}</p>
-                    <p>Aprobados: ${aprobados}</p>
-                    <p>Reprobados: ${reprobados}</p>
+                    <div style="text-align: left; margin-bottom: 20px;">
+                        <p><strong>Total Alumnos:</strong> ${grupo.alumnos.length}</p>
+                        <p><strong>Promedio General:</strong> ${promedioGrupo}</p>
+                        <p><strong>Aprobados:</strong> ${aprobados} (${((aprobados / grupo.alumnos.length) * 100 || 0).toFixed(1)}%)</p>
+                        <p><strong>Reprobados:</strong> ${reprobados} (${((reprobados / grupo.alumnos.length) * 100 || 0).toFixed(1)}%)</p>
+                    </div>
+                    ${chartHtml}
                 `,
-                icon: 'info',
-                confirmButtonText: 'OK'
+                width: '800px',
+                confirmButtonText: 'Cerrar',
+                willOpen: () => {
+                    // Inicializar gráficos después de que se abra el modal
+                    setTimeout(() => {
+                        // Gráfico de aprobados/reprobados
+                        const ctxAprobados = document.getElementById('chartAprobados').getContext('2d');
+                        new Chart(ctxAprobados, {
+                            type: 'pie',
+                            data: {
+                                labels: ['Aprobados', 'Reprobados'],
+                                datasets: [{
+                                    data: [aprobados, reprobados],
+                                    backgroundColor: ['#4CAF50', '#F44336'],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false
+                            }
+                        });
+                        
+                        // Gráfico de evolución de calificaciones
+                        const ctxEvolucion = document.getElementById('chartEvolucion').getContext('2d');
+                        new Chart(ctxEvolucion, {
+                            type: 'line',
+                            data: {
+                                labels: ['Parcial 1', 'Parcial 2', 'Parcial 3'],
+                                datasets: [{
+                                    label: 'Promedio del Grupo',
+                                    data: promediosParciales,
+                                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                                    borderColor: 'rgba(76, 175, 80, 1)',
+                                    borderWidth: 2,
+                                    tension: 0.1,
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: false,
+                                        min: 5,
+                                        max: 10
+                                    }
+                                }
+                            }
+                        });
+                    }, 100);
+                }
             });
         }
 
@@ -535,35 +1009,185 @@
             });
         }
 
-        // Función para cerrar sesión
-        function cerrarSesion() {
-            if (cambiosNoGuardados) {
-                Swal.fire({
-                    title: 'Cambios no guardados',
-                    text: 'Tienes cambios sin guardar. ¿Estás seguro de que deseas cerrar sesión?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, cerrar sesión',
-                    cancelButtonText: 'Cancelar',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = 'index.html';
+        // Función para búsqueda avanzada
+        function mostrarBusquedaAvanzada() {
+            Swal.fire({
+                title: 'Búsqueda Avanzada',
+                html: `
+                    <div style="text-align: left; margin-bottom: 15px;">
+                        <label>Rango de calificación final:</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="min-calif" class="swal2-input" placeholder="Mínimo" min="0" max="10" step="0.1" style="width: 100px;">
+                            <span>a</span>
+                            <input type="number" id="max-calif" class="swal2-input" placeholder="Máximo" min="0" max="10" step="0.1" style="width: 100px;">
+                        </div>
+                    </div>
+                    <div style="text-align: left; margin-bottom: 15px;">
+                        <label>Parcial específico:</label>
+                        <select id="parcial-busqueda" class="swal2-select">
+                            <option value="0">Cualquier parcial</option>
+                            <option value="1">Primer Parcial</option>
+                            <option value="2">Segundo Parcial</option>
+                            <option value="3">Tercer Parcial</option>
+                        </select>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                            <input type="number" id="valor-parcial" class="swal2-input" placeholder="Valor" min="5" max="10" step="0.1" style="width: 100px;">
+                            <select id="operador-parcial" class="swal2-select">
+                                <option value=">=">≥</option>
+                                <option value="<=">≤</option>
+                                <option value="==">=</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="text-align: left;">
+                        <label>Comentarios que contengan:</label>
+                        <input type="text" id="texto-comentario" class="swal2-input" placeholder="Texto en comentarios">
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Buscar',
+                cancelButtonText: 'Cancelar',
+                width: '600px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    aplicarFiltrosAvanzados();
+                }
+            });
+        }
+
+        function aplicarFiltrosAvanzados() {
+            const minCalif = parseFloat(document.getElementById('min-calif').value) || 0;
+            const maxCalif = parseFloat(document.getElementById('max-calif').value) || 10;
+            const parcial = parseInt(document.getElementById('parcial-busqueda').value) || 0;
+            const valorParcial = parseFloat(document.getElementById('valor-parcial').value) || 0;
+            const operadorParcial = document.getElementById('operador-parcial').value;
+            const textoComentario = document.getElementById('texto-comentario').value.toLowerCase();
+            
+            const filas = document.querySelectorAll('.grupo tbody tr');
+            
+            filas.forEach(fila => {
+                const calificacionFinal = parseFloat(fila.querySelector('.calificacion-final').textContent) || 0;
+                const matricula = fila.querySelector('td:nth-child(2)').textContent;
+                const comentario = document.getElementById(`comentario-${matricula}`).value.toLowerCase();
+                
+                // Aplicar filtros
+                let cumpleFiltros = true;
+                
+                // Filtro por rango de calificación final
+                if (calificacionFinal < minCalif || calificacionFinal > maxCalif) {
+                    cumpleFiltros = false;
+                }
+                
+                // Filtro por parcial específico
+                if (parcial > 0 && valorParcial > 0) {
+                    const califParcial = parseFloat(document.getElementById(`calif${parcial}-${matricula}`).value) || 0;
+                    
+                    if (operadorParcial === '>=' && califParcial < valorParcial) {
+                        cumpleFiltros = false;
+                    } else if (operadorParcial === '<=' && califParcial > valorParcial) {
+                        cumpleFiltros = false;
+                    } else if (operadorParcial === '==' && califParcial !== valorParcial) {
+                        cumpleFiltros = false;
                     }
-                });
-            } else {
-                Swal.fire({
-                    title: '¿Cerrar sesión?',
-                    text: '¿Estás seguro de que deseas cerrar sesión?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, cerrar sesión',
-                    cancelButtonText: 'Cancelar',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = 'index.html';
+                }
+                
+                // Filtro por texto en comentarios
+                if (textoComentario && !comentario.includes(textoComentario)) {
+                    cumpleFiltros = false;
+                }
+                
+                fila.style.display = cumpleFiltros ? '' : 'none';
+            });
+            
+            mostrarNotificacion('Filtros avanzados aplicados.', 'success');
+        }
+
+        // Función para aplicar calificación global
+        function aplicarCalificacionGlobal() {
+            Swal.fire({
+                title: 'Aplicar calificación global',
+                html: `
+                    <div style="margin-bottom: 15px;">
+                        <label>Seleccione el parcial:</label>
+                        <select id="parcial-global" class="swal2-select">
+                            <option value="1">Primer Parcial</option>
+                            <option value="2">Segundo Parcial</option>
+                            <option value="3">Tercer Parcial</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Calificación:</label>
+                        <input type="number" id="calificacion-global" class="swal2-input" min="5" max="10" step="0.1" value="6">
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Aplicar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const parcial = document.getElementById('parcial-global').value;
+                    const calificacion = parseFloat(document.getElementById('calificacion-global').value);
+                    
+                    if (isNaN(calificacion)) {
+                        Swal.showValidationMessage('La calificación debe ser un número');
+                        return false;
                     }
-                });
-            }
+                    
+                    if (calificacion < 5 || calificacion > 10) {
+                        Swal.showValidationMessage('La calificación debe estar entre 5 y 10');
+                        return false;
+                    }
+                    
+                    return { parcial, calificacion };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { parcial, calificacion } = result.value;
+                    const filasSeleccionadas = document.querySelectorAll('.grupo tr.selected');
+                    
+                    if (filasSeleccionadas.length === 0) {
+                        mostrarNotificacion('No hay alumnos seleccionados.', 'error');
+                        return;
+                    }
+                    
+                    filasSeleccionadas.forEach(fila => {
+                        const matricula = fila.querySelector('td:nth-child(2)').textContent;
+                        const input = document.getElementById(`calif${parcial}-${matricula}`);
+                        input.value = calificacion;
+                        input.dispatchEvent(new Event('input'));
+                    });
+                    
+                    mostrarNotificacion(`Calificación aplicada a ${filasSeleccionadas.length} alumnos.`, 'success');
+                    marcarCambios();
+                }
+            });
+        }
+
+        // Función para enviar comunicados
+        function enviarComunicado() {
+            Swal.fire({
+                title: 'Enviar comunicado',
+                input: 'textarea',
+                inputLabel: 'Mensaje para los alumnos seleccionados',
+                inputPlaceholder: 'Escribe tu mensaje aquí...',
+                inputAttributes: {
+                    'aria-label': 'Escribe tu mensaje aquí'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Enviar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    const filasSeleccionadas = document.querySelectorAll('.grupo tr.selected');
+                    
+                    if (filasSeleccionadas.length === 0) {
+                        mostrarNotificacion('No hay alumnos seleccionados.', 'error');
+                        return;
+                    }
+                    
+                    // Aquí iría la lógica para enviar el mensaje (email, sistema interno, etc.)
+                    mostrarNotificacion(`Mensaje enviado a ${filasSeleccionadas.length} alumnos.`, 'success');
+                }
+            });
         }
 
         // Función para procesar el archivo importado
@@ -588,6 +1212,7 @@
             }).catch(error => {
                 ocultarCargando();
                 mostrarNotificacion('Hubo un error al procesar los archivos.', 'error');
+                console.error(error);
             });
         }
 
@@ -611,6 +1236,7 @@
                     procesarDatosCalificaciones(jsonData);
                     resolve();
                 };
+                reader.onerror = () => reject('Error al leer el archivo');
                 reader.readAsArrayBuffer(file);
             });
         }
@@ -667,8 +1293,10 @@
         }
 
         // Cargar los grupos asignados al maestro al cargar la página
-        validarSesion();
-        cargarGruposMaestro();
+        document.addEventListener('DOMContentLoaded', function() {
+            validarSesion();
+            cargarGruposMaestro();
+        });
 
         // Alerta de cambios no guardados al intentar salir
         window.addEventListener('beforeunload', function (e) {
