@@ -7,208 +7,256 @@
     <!-- Incluir SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Estilos Globales */
+        /* Estilos Globales Mejorados */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #1a3a1f, #2E7D32);
+            background: linear-gradient(145deg, #0d2911, #2E7D32);
             color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             overflow: hidden;
             position: relative;
         }
 
-        /* Contenedor del formulario de inicio de sesión */
+        /* Contenedor del formulario mejorado */
         .login-container {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 400px;
+            background-color: rgba(255, 255, 255, 0.98);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.2), 
+                        0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 26rem;
             text-align: center;
-            animation: fadeIn 1s ease-in-out;
+            animation: fadeInUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             z-index: 10;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transform-style: preserve-3d;
+            perspective: 1000px;
         }
 
-        @keyframes fadeIn {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: translateY(2rem) rotateX(10deg);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) rotateX(0);
             }
         }
 
         .login-container h2 {
-            font-size: 2rem;
-            margin-bottom: 25px;
+            font-size: 2.2rem;
+            margin-bottom: 1.8rem;
             color: #2E7D32;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.08);
+            letter-spacing: -0.5px;
         }
 
         .input-group {
-            margin-bottom: 25px;
+            margin-bottom: 1.6rem;
             text-align: left;
             position: relative;
         }
 
         .input-group label {
             display: block;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
+            margin-bottom: 0.6rem;
+            font-size: 0.95rem;
             color: #555;
             font-weight: 600;
+            padding-left: 0.5rem;
         }
 
         .input-group input {
-            width: calc(100% - 24px);
-            padding: 12px;
-            border-radius: 10px;
-            border: 2px solid #ddd;
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border-radius: 0.8rem;
+            border: 2px solid #e0e0e0;
             font-size: 1rem;
-            transition: all 0.3s ease;
-            background-color: rgba(255, 255, 255, 0.8);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: rgba(255, 255, 255, 0.9);
+            box-sizing: border-box;
         }
 
         .input-group input:focus {
             border-color: #2E7D32;
             outline: none;
-            box-shadow: 0 0 10px rgba(46, 125, 50, 0.3);
-            transform: translateY(-2px);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+            transform: translateY(-1px);
             background-color: white;
         }
 
         .input-group .error-message {
             color: #d32f2f;
             font-size: 0.8rem;
-            margin-top: 5px;
+            margin-top: 0.4rem;
             display: none;
+            padding-left: 0.5rem;
+            animation: shakeError 0.4s ease;
+        }
+
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
         }
 
         .input-group .toggle-password {
             position: absolute;
-            right: 10px;
+            right: 1rem;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
             color: #2E7D32;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             transition: all 0.3s ease;
             background: none;
             border: none;
-            padding: 5px;
+            padding: 0.3rem;
+            opacity: 0.7;
         }
 
         .input-group .toggle-password:hover {
             color: #1B5E20;
-            transform: translateY(-50%) scale(1.1);
+            transform: translateY(-50%) scale(1.15);
+            opacity: 1;
         }
 
         .btn {
-            background-color: #2E7D32;
+            background: linear-gradient(135deg, #2E7D32, #3a8c40);
             color: white;
             width: 100%;
-            padding: 14px;
+            padding: 1rem;
             border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: bold;
+            border-radius: 0.8rem;
+            font-size: 1.05rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
+            letter-spacing: 0.5px;
+            margin-top: 0.5rem;
         }
 
         .btn:hover {
-            background-color: #1B5E20;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #1B5E20, #2E7D32);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(27, 94, 32, 0.4);
         }
 
         .btn:active {
             transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(27, 94, 32, 0.4);
         }
 
-        /* Enlace de recuperación de contraseña */
+        /* Enlace de recuperación mejorado */
         .forgot-password-link {
-            display: block;
-            margin-top: 15px;
+            display: inline-block;
+            margin-top: 1.2rem;
             color: #2E7D32;
             text-decoration: none;
             font-size: 0.9rem;
             transition: all 0.3s ease;
             font-weight: 600;
+            position: relative;
+            padding-bottom: 0.2rem;
         }
 
         .forgot-password-link:hover {
             color: #1B5E20;
-            text-decoration: underline;
-            transform: translateX(5px);
+            transform: translateX(3px);
+        }
+
+        .forgot-password-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #1B5E20;
+            transition: width 0.3s ease;
+        }
+
+        .forgot-password-link:hover::after {
+            width: 100%;
         }
 
         /* ====================== */
-        /* ANIMACIONES DE FONDO */
+        /* ANIMACIONES DE FONDO MEJORADAS */
         /* ====================== */
         
-        /* Partículas flotantes */
+        /* Partículas mejoradas */
         .particle {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.7);
+            background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(200,255,200,0.7));
             border-radius: 50%;
-            animation: float 15s infinite linear;
+            animation: float 18s infinite linear;
             z-index: 1;
+            filter: blur(0.5px);
         }
 
         @keyframes float {
             0% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 1;
+                transform: translateY(0) rotate(0deg) scale(1);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.7;
             }
             100% {
-                transform: translateY(-100vh) rotate(360deg);
+                transform: translateY(-120vh) rotate(360deg) scale(1.2);
                 opacity: 0;
             }
         }
 
-        /* Ondas de fondo */
+        /* Ondas de fondo mejoradas */
         .wave {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 200%;
-            height: 100px;
+            height: 12vw;
+            min-height: 100px;
+            max-height: 150px;
             background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" fill="%232E7D32" opacity=".25"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" fill="%232E7D32" opacity=".5"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%232E7D32"/></svg>');
             background-repeat: repeat-x;
-            animation: wave 15s linear infinite;
-            opacity: 0.8;
+            animation: wave 20s linear infinite;
+            opacity: 0.7;
             z-index: 2;
+            filter: drop-shadow(0 -5px 5px rgba(0,0,0,0.1));
         }
 
         .wave:nth-child(2) {
             animation-delay: -5s;
-            animation-duration: 20s;
+            animation-duration: 25s;
             opacity: 0.5;
-            height: 150px;
-            bottom: -10px;
+            height: 15vw;
+            min-height: 120px;
+            max-height: 180px;
+            bottom: -0.5rem;
         }
 
         .wave:nth-child(3) {
             animation-delay: -2s;
-            animation-duration: 25s;
+            animation-duration: 30s;
             opacity: 0.3;
-            height: 200px;
-            bottom: -15px;
+            height: 18vw;
+            min-height: 140px;
+            max-height: 200px;
+            bottom: -1rem;
         }
 
         @keyframes wave {
@@ -220,34 +268,44 @@
             }
         }
 
-        /* Hojas flotantes */
+        /* Hojas mejoradas */
         .leaf {
             position: absolute;
             background-size: contain;
             background-repeat: no-repeat;
-            opacity: 0.7;
+            opacity: 0;
             z-index: 3;
             animation: falling linear infinite;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
 
         @keyframes falling {
             0% {
                 top: -10%;
                 transform: translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
             }
             100% {
                 top: 110%;
-                transform: translateX(100px) rotate(360deg);
+                transform: translateX(calc(10vw + 100px)) rotate(720deg);
+                opacity: 0;
             }
         }
 
-        /* Efecto de burbujas */
+        /* Burbujas mejoradas */
         .bubble {
             position: absolute;
             border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.1);
-            animation: bubbleUp 15s infinite ease-in;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(200,255,200,0.4));
+            animation: bubbleUp 20s infinite ease-in;
             z-index: 1;
+            filter: blur(1px);
         }
 
         @keyframes bubbleUp {
@@ -255,12 +313,76 @@
                 transform: translateY(0) scale(0);
                 opacity: 0;
             }
-            20% {
-                opacity: 0.5;
+            10% {
+                opacity: 0.4;
+            }
+            90% {
+                opacity: 0.4;
             }
             100% {
-                transform: translateY(-100vh) scale(1);
+                transform: translateY(-120vh) scale(1.5);
                 opacity: 0;
+            }
+        }
+
+        /* Responsividad mejorada */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 2rem 1.5rem;
+                width: 85%;
+                border-radius: 1rem;
+            }
+            
+            .login-container h2 {
+                font-size: 1.8rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .input-group {
+                margin-bottom: 1.3rem;
+            }
+            
+            .btn {
+                padding: 0.9rem;
+            }
+            
+            /* Reducir animaciones en móviles */
+            .particle, .bubble {
+                display: none;
+            }
+            
+            .leaf {
+                animation-duration: 15s !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                background: linear-gradient(145deg, #0d2911, #1B5E20);
+            }
+            
+            .login-container {
+                width: 90%;
+                padding: 1.8rem 1.2rem;
+                backdrop-filter: none;
+                background-color: rgba(255, 255, 255, 0.98);
+            }
+            
+            .login-container h2 {
+                font-size: 1.6rem;
+            }
+            
+            /* Ocultar más animaciones para mejor rendimiento */
+            .leaf {
+                display: none;
+            }
+            
+            .wave {
+                opacity: 0.4;
+            }
+            
+            .wave:nth-child(2), .wave:nth-child(3) {
+                display: none;
             }
         }
     </style>
@@ -291,39 +413,40 @@
     </div>
 
     <script>
-        // Crear elementos animados de fondo
+        // Crear elementos animados de fondo mejorados
         function createBackgroundElements() {
-            // Crear partículas
-            for (let i = 0; i < 20; i++) {
+            // Crear partículas mejoradas
+            for (let i = 0; i < 15; i++) {
                 const particle = document.createElement('div');
                 particle.classList.add('particle');
                 
-                // Tamaño aleatorio entre 5px y 15px
-                const size = Math.random() * 10 + 5;
+                // Tamaño aleatorio entre 3px y 12px
+                const size = Math.random() * 9 + 3;
                 particle.style.width = `${size}px`;
                 particle.style.height = `${size}px`;
                 
                 // Posición aleatoria
                 particle.style.left = `${Math.random() * 100}vw`;
-                particle.style.top = `${Math.random() * 100}vh`;
+                particle.style.top = `${Math.random() * 20 + 80}vh`;
                 
                 // Opacidad aleatoria
-                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                particle.style.opacity = Math.random() * 0.6 + 0.1;
                 
                 // Animación con duración aleatoria
-                particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+                const duration = Math.random() * 15 + 10;
+                particle.style.animationDuration = `${duration}s`;
                 particle.style.animationDelay = `${Math.random() * 5}s`;
                 
                 document.body.appendChild(particle);
             }
 
-            // Crear hojas
-            for (let i = 0; i < 10; i++) {
+            // Crear hojas mejoradas
+            for (let i = 0; i < 8; i++) {
                 const leaf = document.createElement('div');
                 leaf.classList.add('leaf');
                 
                 // Tamaño aleatorio
-                const size = Math.random() * 30 + 20;
+                const size = Math.random() * 25 + 15;
                 leaf.style.width = `${size}px`;
                 leaf.style.height = `${size}px`;
                 
@@ -331,25 +454,28 @@
                 leaf.style.left = `${Math.random() * 100}vw`;
                 
                 // Color de hoja aleatorio (tonos de verde)
-                const greenShade = Math.floor(Math.random() * 56 + 100); // 100-155
-                leaf.style.backgroundColor = `rgba(50, ${greenShade}, 50, 0.7)`;
-                leaf.style.borderRadius = '50% 0 50% 50%';
-                leaf.style.transform = `rotate(${Math.random() * 360}deg)`;
+                const greenShade = Math.floor(Math.random() * 70 + 80); // 80-150
+                const rotation = Math.random() * 360;
+                leaf.style.backgroundColor = `rgba(40, ${greenShade}, 40, 0.7)`;
+                leaf.style.borderRadius = `${Math.random() * 50 + 30}% ${Math.random() * 50 + 30}% ${Math.random() * 50 + 30}% ${Math.random() * 50 + 30}%`;
+                leaf.style.transform = `rotate(${rotation}deg)`;
+                leaf.style.filter = `hue-rotate(${Math.random() * 60 - 30}deg)`;
                 
                 // Animación con duración aleatoria
-                leaf.style.animationDuration = `${Math.random() * 20 + 10}s`;
+                const duration = Math.random() * 15 + 10;
+                leaf.style.animationDuration = `${duration}s`;
                 leaf.style.animationDelay = `${Math.random() * 5}s`;
                 
                 document.body.appendChild(leaf);
             }
 
-            // Crear burbujas
-            for (let i = 0; i < 15; i++) {
+            // Crear burbujas mejoradas
+            for (let i = 0; i < 12; i++) {
                 const bubble = document.createElement('div');
                 bubble.classList.add('bubble');
                 
                 // Tamaño aleatorio
-                const size = Math.random() * 50 + 20;
+                const size = Math.random() * 40 + 15;
                 bubble.style.width = `${size}px`;
                 bubble.style.height = `${size}px`;
                 
@@ -358,7 +484,8 @@
                 bubble.style.bottom = `-${size}px`;
                 
                 // Animación con duración aleatoria
-                bubble.style.animationDuration = `${Math.random() * 15 + 10}s`;
+                const duration = Math.random() * 15 + 10;
+                bubble.style.animationDuration = `${duration}s`;
                 bubble.style.animationDelay = `${Math.random() * 5}s`;
                 
                 document.body.appendChild(bubble);
